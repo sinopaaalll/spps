@@ -47,7 +47,7 @@
                     <h5 class="modal-title" id="kelasFormModalLabel">Form Kelas</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="kelasForm"> <!-- Tambahkan form -->
+                <form id="kelasForm" autocomplete="off"> <!-- Tambahkan form -->
                     <div class="modal-body">
                         <div class="form-group row">
                             <label for="nama_kelas" class="col-lg-3 col-form-label text-lg-end">Nama Kelas *</label>
@@ -174,36 +174,7 @@
                 });
             });
 
-            // Hapus Data dengan SweetAlert
-            $(document).on('click', '.delete-kelas', function() {
-                let id = $(this).data('id');
-                let url = $(this).data('url');
 
-                Swal.fire({
-                    title: "Apakah Anda yakin?",
-                    text: "Data ini akan dihapus permanen!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Ya, Hapus!",
-                    cancelButtonText: "Batal",
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            url: url,
-                            type: "DELETE",
-                            success: function(response) {
-                                toastr.success(response.message, 'Deleted');
-                                reloadTable();
-                            }
-                        });
-                    }
-                });
-            });
         });
     </script>
 @endpush

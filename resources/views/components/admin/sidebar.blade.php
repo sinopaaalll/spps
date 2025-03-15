@@ -51,7 +51,7 @@
 
               <ul class="pc-navbar">
                   <li class="pc-item pc-caption">
-                      <label>Navigation</label>
+                      <label>Home</label>
                       <i class="ti ti-dashboard"></i>
                   </li>
                   <li class="pc-item">
@@ -64,8 +64,24 @@
                           <span class="pc-mtext">Dashboard</span>
                       </a>
                   </li>
-                  <li class="pc-item">
-                      <a href="{{ route('kelas.index') }}" class="pc-link active">
+
+                  <li class="pc-item pc-caption">
+                      <label>Master Data</label>
+                      <i class="ti ti-dashboard"></i>
+                  </li>
+
+                  <li class="pc-item {{ Request::is('tahun_pelajaran*') ? 'active' : '' }}">
+                      <a href="{{ route('tahun_pelajaran.index') }}" class="pc-link">
+                          <span class="pc-micon">
+                              <svg class="pc-icon">
+                                  <use xlink:href="#custom-status-up"></use>
+                              </svg>
+                          </span>
+                          <span class="pc-mtext">Tahun Pelajaran</span>
+                      </a>
+                  </li>
+                  <li class="pc-item {{ Request::is('kelas*') ? 'active' : '' }}">
+                      <a href="{{ route('kelas.index') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
                                   <use xlink:href="#custom-status-up"></use>
@@ -74,6 +90,12 @@
                           <span class="pc-mtext">Kelas</span>
                       </a>
                   </li>
+
+                  <li class="pc-item pc-caption">
+                      <label>Pembayaran</label>
+                      <i class="ti ti-dashboard"></i>
+                  </li>
+
                   <li class="pc-item pc-hasmenu">
                       <a href="#!" class="pc-link">
                           <span class="pc-micon">

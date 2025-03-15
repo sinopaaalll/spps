@@ -10,5 +10,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="{{ asset('assets/js/plugins/sweetalert2.all.min.js') }}"></script>
 
+{{-- Alert --}}
 
 @stack('custom-scripts')
+
+<x-Admin.Alert />

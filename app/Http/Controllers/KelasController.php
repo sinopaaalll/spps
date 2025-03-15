@@ -16,16 +16,19 @@ class KelasController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $data = Kelas::query();
+            $data = Kelas::all();
             return DataTables::of($data)
                 ->addColumn('aksi', function ($kelas) {
                     $editBtn = '<button type="button" class="btn btn-icon btn-link-warning edit-kelas" data-id="' . $kelas->id . '" data-url="' . route('kelas.show', $kelas->id) . '">
                 <span class="ti ti-edit-circle f-18"></span>
             </button> ';
 
-                    $delBtn = '<button type="button" class="btn btn-icon btn-link-danger delete-kelas" data-id="' . $kelas->id . '" data-url="' . route('kelas.destroy', $kelas->id) . '">
-                <span class="ti ti-trash f-18"></span>
-            </button> ';
+                    $delBtn = '<button class="btn btn-icon btn-link-danger btn-hapus" 
+                    data-url="' . route('kelas.destroy', '__ID__') . '" 
+                    data-id="' . $kelas->id . '" 
+                    data-table="kelas-table">
+                    <span class="ti ti-trash f-18"></span>
+                </button>';
 
                     return $editBtn . $delBtn;
                 })
