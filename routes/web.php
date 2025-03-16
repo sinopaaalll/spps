@@ -6,14 +6,12 @@ use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\TahunPelajaranController;
 use Illuminate\Support\Facades\Route;
 
-
-
-
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
 
 Route::resource('kelas', KelasController::class);
 Route::resource('tahun_pelajaran', TahunPelajaranController::class);

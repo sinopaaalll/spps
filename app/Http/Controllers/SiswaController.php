@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\SiswaImport;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
 
 class SiswaController extends Controller
@@ -216,5 +218,11 @@ class SiswaController extends Controller
                 'message' => 'Data gagal dihapus'
             ]);
         }
+    }
+
+    public function import()
+    {
+        Excel::import(new SiswaImport, 'Siswa_import.xlsx');
+        return 1;
     }
 }
