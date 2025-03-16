@@ -29,7 +29,7 @@
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label for="tahun_awal" class="form-label">Tahun Awal *</label>
-                                    <input type="text" class="form-control @error('tahun_awal') ? is-invalid @enderror"
+                                    <input type="text" class="form-control @error('tahun_awal') is-invalid @enderror"
                                         id="tahun_awal" name="tahun_awal" value="{{ old('tahun_awal') }}"
                                         placeholder="Pilih tahun awal">
                                     @error('tahun_awal')
@@ -42,7 +42,7 @@
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label for="tahun_akhir" class="form-label">Tahun Akhir *</label>
-                                    <input type="text" class="form-control @error('tahun_akhir') ? is-invalid @enderror"
+                                    <input type="text" class="form-control @error('tahun_akhir') is-invalid @enderror"
                                         id="tahun_akhir" name="tahun_akhir" value="{{ old('tahun_akhir') }}" readonly>
                                     @error('tahun_akhir')
                                         <div class="invalid-feedback">

@@ -90,6 +90,16 @@
                           <span class="pc-mtext">Kelas</span>
                       </a>
                   </li>
+                  <li class="pc-item {{ Request::is('siswa*') ? 'active' : '' }}">
+                      <a href="{{ route('siswa.index') }}" class="pc-link">
+                          <span class="pc-micon">
+                              <svg class="pc-icon">
+                                  <use xlink:href="#custom-status-up"></use>
+                              </svg>
+                          </span>
+                          <span class="pc-mtext">Siswa</span>
+                      </a>
+                  </li>
 
                   <li class="pc-item pc-caption">
                       <label>Pembayaran</label>

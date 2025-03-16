@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Kelas;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Siswa;
 use App\Models\TahunPelajaran;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -26,10 +27,12 @@ class DatabaseSeeder extends Seeder
         //     'nama_kelas' => 1,
         // ]);
 
-        TahunPelajaran::create([
-            'tahun_awal' => 2024,
-            'tahun_akhir' => 2025,
-            'status' => "Aktif"
-        ]);
+        // TahunPelajaran::create([
+        //     'tahun_awal' => 2024,
+        //     'tahun_akhir' => 2025,
+        //     'status' => "Aktif"
+        // ]);
+
+        Siswa::factory(50)->create();
     }
 }
