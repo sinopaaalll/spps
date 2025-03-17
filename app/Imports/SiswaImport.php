@@ -12,14 +12,14 @@ class SiswaImport implements ToModel, WithHeadingRow, WithUpserts
     public function model(array $row)
     {
         return new Siswa([
-            'nama' => $row['nama*'],
-            'jk' => $row['jenis_kelamin*'],
+            'nama' => $row['nama'],
+            'jk' => $row['jenis_kelamin'],
             'tempat_lahir' => $row['tempat_lahir'],
             'tanggal_lahir' => $row['tanggal_lahir'],
             'alamat' => $row['alamat'],
-            'nis' => $row['nis*'],
-            'kelas_id' => $row['kelas*'],
-            'status' => $row['status*'],
+            'nis' => $row['nis'],
+            'kelas_id' => $row['kelas'],
+            'status' => $row['status'],
             'nama_ibu' => $row['nama_ibu'],
             'nama_ayah' => $row['nama_ayah'],
             'nama_wali' => $row['nama_wali'],

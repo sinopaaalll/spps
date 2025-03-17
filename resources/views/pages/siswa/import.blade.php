@@ -26,7 +26,7 @@
                         <h6>CATATAN :</h6>
                         <ol>
                             <li>
-                                <p>Heading pada excel dengan tanda <b>(*)</b> menandakan kolom <b>WAJIB</b> di isi.</p>
+                                <p>Heading pada excel dengan <b>KOMENTAR</b> menandakan kolom <b>WAJIB</b> di isi.</p>
                             </li>
                             <li>
                                 <p>Pengisian data <b>NAMA, TEMPAT LAHIR</b> diawali dengan huruf kapital.</p>
