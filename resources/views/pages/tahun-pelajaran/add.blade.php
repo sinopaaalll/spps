@@ -60,7 +60,7 @@
                                         <div class="form-check form-check-inline">
                                             <input class="form-check-input" type="radio" name="status"
                                                 value="{{ $item }}" id="status{{ $loop->index }}"
-                                                {{ $item == 'Aktif' ? 'checked' : '' }}>
+                                                {{ $item == 'Tidak Aktif' ? 'checked' : '' }}>
                                             <label class="form-check-label" for="status{{ $loop->index }}">
                                                 {{ $item }} </label>
                                         </div>

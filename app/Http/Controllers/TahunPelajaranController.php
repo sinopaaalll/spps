@@ -31,7 +31,16 @@ class TahunPelajaranController extends Controller
                     <span class="ti ti-trash f-18"></span>
                 </button>';
 
-                    return $editBtn . $delBtn;
+                    $activeBtn = $tahun_pelajaran->status == 'Tidak Aktif'
+                        ? '<form action="' . route('tahun_pelajaran.active', $tahun_pelajaran->id) . '" method="POST" style="display:inline;">
+                        ' . csrf_field() . method_field('PUT') . '
+                        <button type="submit" class="btn btn-icon btn-link-success">
+                            <span class="ti ti-check f-18"></span>
+                        </button>
+                    </form>'
+                        : '';
+
+                    return $editBtn . $delBtn . $activeBtn;
                 })
                 ->rawColumns([
                     'aksi',
@@ -77,7 +86,13 @@ class TahunPelajaranController extends Controller
 
         DB::beginTransaction();
         try {
+
             TahunPelajaran::create($request->all());
+
+            if ($request->status) {
+                TahunPelajaran::query()->update(['status' => 'Tidak Aktif']);
+            }
+
             DB::commit();
             return redirect()->route('tahun_pelajaran.index')->with('success', 'Data berhasil disimpan');
         } catch (\Throwable $th) {
@@ -132,7 +147,13 @@ class TahunPelajaranController extends Controller
 
         DB::beginTransaction();
         try {
-            $tahun_pelajaran->update($request->all());
+
+            if ($request->has('status')) {
+                return redirect()->back()->with('error', 'Status tidak dapat diubah.');
+            }
+            // Update tanpa mengubah status
+            $tahun_pelajaran->update($request->except('status'));
+
             DB::commit();
             return redirect()->route('tahun_pelajaran.index')->with('success', 'Data berhasil diubah');
         } catch (\Throwable $th) {
@@ -161,6 +182,25 @@ class TahunPelajaranController extends Controller
                 'status' => 422,
                 'message' => 'Data gagal dihapus'
             ]);
+        }
+    }
+
+    public function active(string $id)
+    {
+        DB::beginTransaction();
+        try {
+            // Reset semua status menjadi "Tidak Aktif"
+            TahunPelajaran::query()->update(['status' => 'Tidak Aktif']);
+
+            // Aktifkan data yang dipilih
+            $tahun_pelajaran = TahunPelajaran::findOrFail($id);
+            $tahun_pelajaran->update(['status' => 'Aktif']);
+
+            DB::commit();
+            return redirect()->route('tahun_pelajaran.index')->with('success', 'Tahun pelajaran berhasil diaktifkan');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('tahun_pelajaran.index')->with('error', 'Gagal mengaktifkan tahun pelajaran');
         }
     }
 }

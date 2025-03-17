@@ -13,13 +13,16 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::resource('siswa', SiswaController::class);
 Route::get('/siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
 Route::post('/siswa/import', [SiswaController::class, 'proses_import'])->name('siswa.import.store');
 Route::get('/siswa/template', [SiswaController::class, 'template'])->name('siswa.template');
 
 Route::resource('kelas', KelasController::class);
+
 Route::resource('tahun_pelajaran', TahunPelajaranController::class);
-Route::resource('siswa', SiswaController::class);
+Route::put('/tahun_pelajaran/{id}/active', [TahunPelajaranController::class, 'active'])->name('tahun_pelajaran.active');
 
 Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
 Route::post('/pos', [PosController::class, 'store'])->name('pos.store');
