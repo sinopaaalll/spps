@@ -58,7 +58,7 @@
                         <a href="{{ route('siswa.create') }}" class="btn btn-primary">
                             <span class="fa fa-plus"></span>&nbsp; Tambah
                         </a>
-                        <a href="{{ route('siswa.create') }}" class="btn btn-success">
+                        <a href="{{ route('siswa.import') }}" class="btn btn-success">
                             <span class="fa fa-upload"></span>&nbsp; Import
                         </a>
                     </div>

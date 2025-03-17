@@ -7,6 +7,8 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
@@ -222,7 +224,56 @@ class SiswaController extends Controller
 
     public function import()
     {
-        Excel::import(new SiswaImport, 'Siswa_import.xlsx');
-        return 1;
+        return view('pages.siswa.import');
+    }
+
+    public function proses_import(Request $request)
+    {
+        // Validasi request
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:4096' // Batasi ukuran file (opsional)
+        ]);
+
+        // Simpan file ke storage/public/import/temp
+        $filePath = $request->file('file')->store('public/import/temp');
+
+        // Ambil path lengkap ke file
+        $fullPath = storage_path('app/' . $filePath);
+
+        // Mulai transaksi database
+        DB::beginTransaction();
+
+        try {
+            // Lakukan import menggunakan file yang sudah disimpan
+            Excel::import(new SiswaImport, $fullPath);
+
+            // Hapus file setelah import selesai (opsional)
+            Storage::delete($filePath);
+
+            // Commit transaksi jika berhasil
+            DB::commit();
+
+            return redirect()->route('siswa.index')->with('success', 'Data berhasil diimport!');
+        } catch (\Exception $e) {
+            // Rollback transaksi jika terjadi kesalahan
+            DB::rollBack();
+
+            // Hapus file jika terjadi error
+            Storage::delete($filePath);
+
+            return redirect()->route('siswa.index')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function template()
+    {
+        $filePath = public_path('template/Template_import_siswa.xlsx');
+
+        // Pastikan file ada sebelum mengirimkan response download
+        if (file_exists($filePath)) {
+            return Response::download($filePath, 'Template_import_siswa.xlsx');
+        } else {
+            return redirect()->back()->with('error', 'File template tidak ditemukan!');
+        }
     }
 }
