@@ -2,32 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kelas;
+use App\Models\Pos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\DataTables;
 
-class KelasController extends Controller
+class PosController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         if (request()->ajax()) {
-            $data = Kelas::all();
+            $data = pos::all();
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('aksi', function ($kelas) {
-                    $editBtn = '<button type="button" class="btn btn-icon btn-link-warning edit-kelas" data-id="' . $kelas->id . '" data-url="' . route('kelas.show', $kelas->id) . '">
+                ->addColumn('aksi', function ($pos) {
+                    $editBtn = '<button type="button" class="btn btn-icon btn-link-warning edit-pos" data-id="' . $pos->id . '" data-url="' . route('pos.show', $pos->id) . '">
                 <span class="ti ti-edit-circle f-18"></span>
             </button> ';
 
                     $delBtn = '<button class="btn btn-icon btn-link-danger btn-hapus" 
-                    data-url="' . route('kelas.destroy', '__ID__') . '" 
-                    data-id="' . $kelas->id . '" 
-                    data-table="kelas-table">
+                    data-url="' . route('pos.destroy', '__ID__') . '" 
+                    data-id="' . $pos->id . '" 
+                    data-table="pos-table">
                     <span class="ti ti-trash f-18"></span>
                 </button>';
 
@@ -38,24 +35,22 @@ class KelasController extends Controller
                 ])
                 ->make(true);
         }
-        return view('pages.kelas.index');
+        return view('pages.pos.index');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'nama_kelas' => ['required', 'unique:kelas']
+            'nama' => ['required', 'unique:pos'],
+
         ], [
-            'nama_kelas.required' => 'Kelas tidak boleh kosong.',
-            'nama_kelas.unique' => 'Kelas ini sudah terpakai.',
+            'nama.required' => 'Nama pos tidak boleh kosong.',
+            'nama.unique' => 'Nama pos ini sudah terpakai.',
         ]);
 
         DB::beginTransaction();
         try {
-            Kelas::create($request->all());
+            Pos::create($request->all());
             DB::commit();
             return response()->json([
                 'status' => 200,
@@ -75,8 +70,8 @@ class KelasController extends Controller
      */
     public function show(string $id)
     {
-        $kelas = Kelas::findOrFail($id);
-        return response()->json(['kelas' => $kelas]);
+        $pos = Pos::findOrFail($id);
+        return response()->json(['pos' => $pos]);
     }
 
     /**
@@ -84,17 +79,17 @@ class KelasController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $kelas = Kelas::findOrFail($id);
+        $pos = Pos::findOrFail($id);
         $request->validate([
-            'nama_kelas' => ['required', Rule::unique('kelas', 'nama_kelas')->ignore($kelas)]
+            'nama' => ['required', Rule::unique('pos', 'nama')->ignore($pos)]
         ], [
-            'nama_kelas.required' => 'Kelas tidak boleh kosong.',
-            'nama_kelas.unique' => 'Kelas ini sudah terpakai.',
+            'nama.required' => 'Nama pos tidak boleh kosong.',
+            'nama.unique' => 'Nama pos ini sudah terpakai.',
         ]);
 
         DB::beginTransaction();
         try {
-            $kelas->update($request->all());
+            $pos->update($request->all());
             DB::commit();
             return response()->json([
                 'status' => 200,
@@ -114,10 +109,10 @@ class KelasController extends Controller
      */
     public function destroy(string $id)
     {
-        $kelas = Kelas::findOrFail($id);
+        $pos = Pos::findOrFail($id);
         DB::beginTransaction();
         try {
-            $kelas->delete();
+            $pos->delete();
             DB::commit();
             return response()->json([
                 'status' => 200,

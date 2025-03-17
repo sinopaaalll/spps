@@ -18,6 +18,7 @@ class TahunPelajaranController extends Controller
         if (request()->ajax()) {
             $data = TahunPelajaran::all();
             return DataTables::of($data)
+                ->addIndexColumn()
                 ->addColumn('aksi', function ($tahun_pelajaran) {
                     $editBtn = '<a class="btn btn-icon btn-link-warning" href="' . route('tahun_pelajaran.edit', $tahun_pelajaran->id) . '">
                 <span class="ti ti-edit-circle f-18"></span>

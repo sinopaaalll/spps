@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Kelas')
-@section('breadcrumb', 'Kelas')
-@section('breadcrumb-text', 'Data Kelas')
+@section('title', 'POS Pembayaran')
+@section('breadcrumb', 'POS Pembayaran')
+@section('breadcrumb-text', 'Data POS Pembayaran')
 
 @section('url')
-    {{ route('kelas.index') }}
+    {{ route('pos.index') }}
 @endsection
 
 @section('content')
@@ -16,22 +16,21 @@
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <h5>Data @yield('title')</h5>
                     <div class="card-tools text-end">
-                        <button type="button" class="btn btn-primary" id="createKelasBtn">
+                        <button type="button" class="btn btn-primary" id="createPosBtn">
                             <span class="fa fa-plus"></span>&nbsp; Tambah
                         </button>
                     </div>
                 </div>
                 <div class="card-body">
-                    <table class="table table-striped" id="kelas-table">
+                    <table class="table table-striped" id="pos-table">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Kelas</th>
+                                <th>POS</th>
+                                <th>Keterangan</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        {{-- DataTables Server side --}}
-                        <tbody></tbody>
                     </table>
                 </div>
             </div>
@@ -39,21 +38,27 @@
         <!-- [ sample-page ] end -->
     </div>
 
-    <div id="kelasFormModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="kelasFormModalLabel"
+    <div id="posFormModal" class="modal modal-lg fade" tabindex="-1" role="dialog" aria-labelledby="posFormModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="kelasFormModalLabel">Form Kelas</h5>
+                    <h5 class="modal-title" id="posFormModalLabel">Form pos</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="kelasForm" autocomplete="off"> <!-- Tambahkan form -->
+                <form id="posForm" autocomplete="off"> <!-- Tambahkan form -->
                     <div class="modal-body">
                         <div class="form-group row">
-                            <label for="nama_kelas" class="col-lg-3 col-form-label text-lg-end">Nama Kelas *</label>
+                            <label for="nama" class="col-lg-3 col-form-label text-lg-end">Nama Pembayaran *</label>
                             <div class="col-lg-9">
-                                <input type="text" id="nama_kelas" name="nama_kelas" class="form-control"
-                                    placeholder="Masukkan Nama Kelas">
+                                <input type="text" id="nama" name="nama" class="form-control"
+                                    placeholder="Masukkan nama pos pembayaran...">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="keterangan" class="col-lg-3 col-form-label text-lg-end">Keterangan*</label>
+                            <div class="col-lg-9">
+                                <textarea id="keterangan" name="keterangan" class="form-control"></textarea>
                             </div>
                         </div>
                         <input type="hidden" id="update_id" name="update_id">
@@ -81,17 +86,21 @@
 
     <script>
         $(document).ready(function() {
-            let table = $('#kelas-table').DataTable({
+            let table = $('#pos-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('kelas.index') }}',
+                ajax: '{{ route('pos.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex'
                     },
                     {
-                        data: 'nama_kelas',
-                        name: 'nama_kelas'
+                        data: 'nama',
+                        name: 'nama'
+                    },
+                    {
+                        data: 'keterangan',
+                        name: 'keterangan'
                     },
                     {
                         data: 'aksi',
@@ -106,22 +115,22 @@
             }
 
             // Tambah Data (Open Modal)
-            $('#createKelasBtn').on('click', function() {
+            $('#createPosBtn').on('click', function() {
                 $('.is-invalid').removeClass('is-invalid');
                 $('.invalid-feedback').remove();
 
-                $('#kelasForm')[0].reset();
+                $('#posForm')[0].reset();
                 $('#update_id').val('');
-                $('#kelasFormModalLabel').text('Tambah Kelas');
+                $('#posFormModalLabel').text('Tambah POS Pembayaran');
                 $('#save').text('Simpan');
-                $('#kelasFormModal').modal('show');
+                $('#posFormModal').modal('show');
             });
 
             // Simpan atau Update Data
             $('#save').on('click', function(e) {
                 e.preventDefault();
                 let id = $('#update_id').val();
-                let url = id ? '{{ url('kelas') }}/' + id : '{{ route('kelas.store') }}';
+                let url = id ? '{{ url('pos') }}/' + id : '{{ route('pos.store') }}';
                 let type = id ? 'PUT' : 'POST';
 
                 $.ajax({
@@ -131,11 +140,12 @@
                     url: url,
                     type: type,
                     data: {
-                        nama_kelas: $('#nama_kelas').val()
+                        nama: $('#nama').val(),
+                        keterangan: $('#keterangan').val()
                     },
                     success: function(response) {
                         toastr.success(response.message, 'Success');
-                        $('#kelasFormModal').modal('hide');
+                        $('#posFormModal').modal('hide');
                         reloadTable();
                     },
                     error: function(xhr) {
@@ -153,7 +163,7 @@
             });
 
             // Edit Data
-            $(document).on('click', '.edit-kelas', function() {
+            $(document).on('click', '.edit-pos', function() {
                 let id = $(this).data('id');
                 let url = $(this).data('url');
 
@@ -162,11 +172,12 @@
                     $('.is-invalid').removeClass('is-invalid');
                     $('.invalid-feedback').remove();
 
-                    $('#update_id').val(response.kelas.id);
-                    $('#nama_kelas').val(response.kelas.nama_kelas);
-                    $('#kelasFormModalLabel').text('Edit Kelas');
+                    $('#update_id').val(response.pos.id);
+                    $('#nama').val(response.pos.nama);
+                    $('#keterangan').val(response.pos.keterangan);
+                    $('#posFormModalLabel').text('Edit pos');
                     $('#save').text('Ubah');
-                    $('#kelasFormModal').modal('show');
+                    $('#posFormModal').modal('show');
                 });
             });
 

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Kelas;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Pos;
 use App\Models\Siswa;
 use App\Models\TahunPelajaran;
 use App\Models\User;
@@ -33,6 +34,6 @@ class DatabaseSeeder extends Seeder
         //     'status' => "Aktif"
         // ]);
 
-        Siswa::factory(50)->create();
+        Pos::factory(5)->create();
     }
 }

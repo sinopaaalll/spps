@@ -60,12 +60,8 @@
                 serverSide: true,
                 ajax: '{{ route('tahun_pelajaran.index') }}',
                 columns: [{
-                        data: null,
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row, meta) {
-                            return meta.row + 1; // Nomor urut dari 1
-                        }
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex'
                     },
                     {
                         data: null,
