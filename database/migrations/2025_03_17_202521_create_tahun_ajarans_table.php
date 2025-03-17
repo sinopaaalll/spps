@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tahun_pelajaran', function (Blueprint $table) {
+        Schema::create('tahun_ajaran', function (Blueprint $table) {
             $table->id();
             $table->year('tahun_awal');
             $table->year('tahun_akhir');
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tahun_pelajaran');
+        Schema::dropIfExists('tahun_ajaran');
     }
 };

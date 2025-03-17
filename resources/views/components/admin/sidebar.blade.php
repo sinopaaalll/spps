@@ -70,14 +70,14 @@
                       <i class="ti ti-dashboard"></i>
                   </li>
 
-                  <li class="pc-item {{ Request::is('tahun_pelajaran*') ? 'active' : '' }}">
-                      <a href="{{ route('tahun_pelajaran.index') }}" class="pc-link">
+                  <li class="pc-item {{ Request::is('tahun_ajaran*') ? 'active' : '' }}">
+                      <a href="{{ route('tahun_ajaran.index') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
                                   <use xlink:href="#custom-status-up"></use>
                               </svg>
                           </span>
-                          <span class="pc-mtext">Tahun Pelajaran</span>
+                          <span class="pc-mtext">Tahun Ajaran</span>
                       </a>
                   </li>
                   <li class="pc-item {{ Request::is('kelas*') ? 'active' : '' }}">
@@ -112,7 +112,17 @@
                                   <use xlink:href="#custom-status-up"></use>
                               </svg>
                           </span>
-                          <span class="pc-mtext">POS Pembayaran</span>
+                          <span class="pc-mtext">Pos Pembayaran</span>
+                      </a>
+                  </li>
+                  <li class="pc-item {{ Request::is('jenis_pembayaran*') ? 'active' : '' }}">
+                      <a href="{{ route('jenis_pembayaran.index') }}" class="pc-link">
+                          <span class="pc-micon">
+                              <svg class="pc-icon">
+                                  <use xlink:href="#custom-status-up"></use>
+                              </svg>
+                          </span>
+                          <span class="pc-mtext">Jenis Pembayaran</span>
                       </a>
                   </li>
 

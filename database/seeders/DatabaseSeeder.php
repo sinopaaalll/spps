@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\JenisPembayaran;
 use App\Models\Kelas;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Pos;
 use App\Models\Siswa;
-use App\Models\TahunPelajaran;
+use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -24,16 +25,22 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        // Kelas::create([
-        //     'nama_kelas' => 1,
-        // ]);
+        for ($i = 1; $i < 7; $i++) {
+            Kelas::create([
+                'nama_kelas' => $i,
+            ]);
+        }
 
-        // TahunPelajaran::create([
-        //     'tahun_awal' => 2024,
-        //     'tahun_akhir' => 2025,
-        //     'status' => "Aktif"
-        // ]);
+        TahunAjaran::create([
+            'tahun_awal' => 2024,
+            'tahun_akhir' => 2025,
+            'status' => "Aktif"
+        ]);
 
-        Pos::factory(5)->create();
+        Siswa::factory(100)->create();
+
+        Pos::factory(2)->create();
+
+        JenisPembayaran::factory(2)->create();
     }
 }

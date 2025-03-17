@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Tahun Pelajaran')
-@section('breadcrumb', 'Tahun Pelajaran')
-@section('breadcrumb-text', 'Edit Tahun Pelajaran')
+@section('title', 'Tambah Tahun Ajaran')
+@section('breadcrumb', 'Tahun Ajaran')
+@section('breadcrumb-text', 'Tambah Tahun Ajaran')
 
 @section('url')
-    {{ route('tahun_pelajaran.index') }}
+    {{ route('tahun_ajaran.index') }}
 @endsection
 
 @section('content')
@@ -15,7 +15,7 @@
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span class="d-block m-t-5">*) Kolom wajib diisi.</span>
                     <div class="card-tools text-end">
-                        <a href="{{ route('tahun_pelajaran.index') }}">
+                        <a href="{{ route('tahun_ajaran.index') }}">
                             <button type="button" class="btn btn-primary">
                                 <span class="fa fa-arrow-left"></span>&nbsp; Back
                             </button>
@@ -23,15 +23,14 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('tahun_pelajaran.update', $tahun_pelajaran->id) }}" method="post">
+                    <form action="{{ route('tahun_ajaran.store') }}" method="post">
                         @csrf
-                        @method('PUT')
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label for="tahun_awal" class="form-label">Tahun Awal *</label>
                                     <input type="text" class="form-control @error('tahun_awal') is-invalid @enderror"
-                                        id="tahun_awal" name="tahun_awal" value="{{ $tahun_pelajaran->tahun_awal }}"
+                                        id="tahun_awal" name="tahun_awal" value="{{ old('tahun_awal') }}"
                                         placeholder="Pilih tahun awal">
                                     @error('tahun_awal')
                                         <div class="invalid-feedback">
@@ -44,8 +43,7 @@
                                 <div class="form-group">
                                     <label for="tahun_akhir" class="form-label">Tahun Akhir *</label>
                                     <input type="text" class="form-control @error('tahun_akhir') is-invalid @enderror"
-                                        id="tahun_akhir" name="tahun_akhir" value="{{ $tahun_pelajaran->tahun_akhir }}"
-                                        readonly>
+                                        id="tahun_akhir" name="tahun_akhir" value="{{ old('tahun_akhir') }}" readonly>
                                     @error('tahun_akhir')
                                         <div class="invalid-feedback">
                                             {{ $message }}
@@ -62,7 +60,7 @@
                                         <div class="form-check form-check-inline">
                                             <input class="form-check-input" type="radio" name="status"
                                                 value="{{ $item }}" id="status{{ $loop->index }}"
-                                                {{ $item == $tahun_pelajaran->status ? 'checked' : '' }}>
+                                                {{ $item == 'Tidak Aktif' ? 'checked' : '' }}>
                                             <label class="form-check-label" for="status{{ $loop->index }}">
                                                 {{ $item }} </label>
                                         </div>
@@ -82,7 +80,7 @@
                         <div class="form-group">
                             <label class="col-form-label"></label>
                             <button type="submit" class="btn btn-primary"><span class="fa fa-save"></span>&nbsp;
-                                Ubah</button>
+                                Simpan</button>
                         </div>
                     </form>
                 </div>

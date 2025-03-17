@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Tahun Pelajaran')
-@section('breadcrumb', 'Tahun Pelajaran')
-@section('breadcrumb-text', 'Data Tahun Pelajaran')
+@section('title', 'Tahun Ajaran')
+@section('breadcrumb', 'Tahun Ajaran')
+@section('breadcrumb-text', 'Data Tahun Ajaran')
 
 @section('url')
-    {{ route('tahun_pelajaran.index') }}
+    {{ route('tahun_ajaran.index') }}
 @endsection
 
 @section('content')
@@ -16,17 +16,17 @@
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <h5>Data @yield('title')</h5>
                     <div class="card-tools text-end">
-                        <a href="{{ route('tahun_pelajaran.create') }}" class="btn btn-primary">
+                        <a href="{{ route('tahun_ajaran.create') }}" class="btn btn-primary">
                             <span class="fa fa-plus"></span>&nbsp; Tambah
                         </a>
                     </div>
                 </div>
                 <div class="card-body">
-                    <table class="table table-striped" id="tahun-pelajaran-table">
+                    <table class="table table-striped" id="tahun-ajaran-table">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Tahun Pelajaran</th>
+                                <th>Tahun Ajaran</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -55,13 +55,15 @@
 
     <script>
         $(document).ready(function() {
-            let table = $('#tahun-pelajaran-table').DataTable({
+            let table = $('#tahun-ajaran-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('tahun_pelajaran.index') }}',
+                ajax: '{{ route('tahun_ajaran.index') }}',
                 columns: [{
                         data: 'DT_RowIndex',
-                        name: 'DT_RowIndex'
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: null,

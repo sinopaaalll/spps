@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TahunPelajaran;
+use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\DataTables;
 
-class TahunPelajaranController extends Controller
+class TahunAjaranController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,23 +16,23 @@ class TahunPelajaranController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $data = TahunPelajaran::all();
+            $data = TahunAjaran::all();
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('aksi', function ($tahun_pelajaran) {
-                    $editBtn = '<a class="btn btn-icon btn-link-warning" href="' . route('tahun_pelajaran.edit', $tahun_pelajaran->id) . '">
+                ->addColumn('aksi', function ($tahun_ajaran) {
+                    $editBtn = '<a class="btn btn-icon btn-link-warning" href="' . route('tahun_ajaran.edit', $tahun_ajaran->id) . '">
                 <span class="ti ti-edit-circle f-18"></span>
             </a> ';
 
                     $delBtn = '<button class="btn btn-icon btn-link-danger btn-hapus" 
-                    data-url="' . route('tahun_pelajaran.destroy', '__ID__') . '" 
-                    data-id="' . $tahun_pelajaran->id . '" 
-                    data-table="tahun-pelajaran-table">
+                    data-url="' . route('tahun_ajaran.destroy', '__ID__') . '" 
+                    data-id="' . $tahun_ajaran->id . '" 
+                    data-table="tahun-ajaran-table">
                     <span class="ti ti-trash f-18"></span>
                 </button>';
 
-                    $activeBtn = $tahun_pelajaran->status == 'Tidak Aktif'
-                        ? '<form action="' . route('tahun_pelajaran.active', $tahun_pelajaran->id) . '" method="POST" style="display:inline;">
+                    $activeBtn = $tahun_ajaran->status == 'Tidak Aktif'
+                        ? '<form action="' . route('tahun_ajaran.active', $tahun_ajaran->id) . '" method="POST" style="display:inline;">
                         ' . csrf_field() . method_field('PUT') . '
                         <button type="submit" class="btn btn-icon btn-link-success">
                             <span class="ti ti-check f-18"></span>
@@ -47,7 +47,7 @@ class TahunPelajaranController extends Controller
                 ])
                 ->make(true);
         }
-        return view('pages.tahun-pelajaran.index');
+        return view('pages.tahun-ajaran.index');
     }
 
     /**
@@ -59,7 +59,7 @@ class TahunPelajaranController extends Controller
             'Aktif' => 'Aktif',
             'Tidak Aktif' => 'Tidak Aktif'
         ];
-        return view('pages.tahun-pelajaran.add', compact('status'));
+        return view('pages.tahun-ajaran.add', compact('status'));
     }
 
     /**
@@ -68,7 +68,7 @@ class TahunPelajaranController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tahun_awal' => ['required', 'digits:4', 'integer', 'unique:tahun_pelajaran,tahun_awal'],
+            'tahun_awal' => ['required', 'digits:4', 'integer', 'unique:tahun_ajaran,tahun_awal'],
             'tahun_akhir' => ['required', 'digits:4', 'integer'],
             'status' => ['required'],
         ], [
@@ -87,17 +87,17 @@ class TahunPelajaranController extends Controller
         DB::beginTransaction();
         try {
 
-            TahunPelajaran::create($request->all());
+            TahunAjaran::create($request->all());
 
             if ($request->status) {
-                TahunPelajaran::query()->update(['status' => 'Tidak Aktif']);
+                TahunAjaran::query()->update(['status' => 'Tidak Aktif']);
             }
 
             DB::commit();
-            return redirect()->route('tahun_pelajaran.index')->with('success', 'Data berhasil disimpan');
+            return redirect()->route('tahun_ajaran.index')->with('success', 'Data berhasil disimpan');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->route('tahun_pelajaran.index')->with('error', 'Data gagal disimpan');
+            return redirect()->route('tahun_ajaran.index')->with('error', 'Data gagal disimpan');
         }
     }
 
@@ -114,12 +114,12 @@ class TahunPelajaranController extends Controller
      */
     public function edit(string $id)
     {
-        $tahun_pelajaran = TahunPelajaran::findOrFail($id);
+        $tahun_ajaran = TahunAjaran::findOrFail($id);
         $status = [
             'Aktif' => 'Aktif',
             'Tidak Aktif' => 'Tidak Aktif'
         ];
-        return view('pages.tahun-pelajaran.edit', compact('status', 'tahun_pelajaran'));
+        return view('pages.tahun-ajaran.edit', compact('status', 'tahun_ajaran'));
     }
 
     /**
@@ -127,9 +127,9 @@ class TahunPelajaranController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $tahun_pelajaran = TahunPelajaran::findOrFail($id);
+        $tahun_ajaran = TahunAjaran::findOrFail($id);
         $request->validate([
-            'tahun_awal' => ['required', 'digits:4', 'integer', Rule::unique('tahun_pelajaran', 'tahun_awal')->ignore($tahun_pelajaran)],
+            'tahun_awal' => ['required', 'digits:4', 'integer', Rule::unique('tahun_ajaran', 'tahun_awal')->ignore($tahun_ajaran)],
             'tahun_akhir' => ['required', 'digits:4', 'integer'],
             'status' => ['required'],
         ], [
@@ -152,13 +152,13 @@ class TahunPelajaranController extends Controller
                 return redirect()->back()->with('error', 'Status tidak dapat diubah.');
             }
             // Update tanpa mengubah status
-            $tahun_pelajaran->update($request->except('status'));
+            $tahun_ajaran->update($request->except('status'));
 
             DB::commit();
-            return redirect()->route('tahun_pelajaran.index')->with('success', 'Data berhasil diubah');
+            return redirect()->route('tahun_ajaran.index')->with('success', 'Data berhasil diubah');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->route('tahun_pelajaran.index')->with('error', 'Data gagal diubah');
+            return redirect()->route('tahun_ajaran.index')->with('error', 'Data gagal diubah');
         }
     }
 
@@ -167,10 +167,10 @@ class TahunPelajaranController extends Controller
      */
     public function destroy(string $id)
     {
-        $tahun_pelajaran = TahunPelajaran::findOrFail($id);
+        $tahun_ajaran = TahunAjaran::findOrFail($id);
         DB::beginTransaction();
         try {
-            $tahun_pelajaran->delete();
+            $tahun_ajaran->delete();
             DB::commit();
             return response()->json([
                 'status' => 200,
@@ -190,17 +190,17 @@ class TahunPelajaranController extends Controller
         DB::beginTransaction();
         try {
             // Reset semua status menjadi "Tidak Aktif"
-            TahunPelajaran::query()->update(['status' => 'Tidak Aktif']);
+            TahunAjaran::query()->update(['status' => 'Tidak Aktif']);
 
             // Aktifkan data yang dipilih
-            $tahun_pelajaran = TahunPelajaran::findOrFail($id);
-            $tahun_pelajaran->update(['status' => 'Aktif']);
+            $tahun_ajaran = TahunAjaran::findOrFail($id);
+            $tahun_ajaran->update(['status' => 'Aktif']);
 
             DB::commit();
-            return redirect()->route('tahun_pelajaran.index')->with('success', 'Tahun pelajaran berhasil diaktifkan');
+            return redirect()->route('tahun_ajaran.index')->with('success', 'Tahun pelajaran berhasil diaktifkan');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->route('tahun_pelajaran.index')->with('error', 'Gagal mengaktifkan tahun pelajaran');
+            return redirect()->route('tahun_ajaran.index')->with('error', 'Gagal mengaktifkan tahun pelajaran');
         }
     }
 }
