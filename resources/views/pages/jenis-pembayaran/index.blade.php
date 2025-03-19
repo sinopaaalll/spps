@@ -29,6 +29,7 @@
                                 <th>POS</th>
                                 <th>Tahun Ajaran</th>
                                 <th>Tipe</th>
+                                <th>Setting Tarif</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -80,6 +81,12 @@
                     {
                         data: 'tipe',
                         name: 'tipe'
+                    },
+                    {
+                        data: 'setting_tarif',
+                        name: 'setting_tarif',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'aksi',

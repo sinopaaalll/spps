@@ -45,3 +45,9 @@ Route::post('/jenis_pembayaran', [JenisPembayaranController::class, 'store'])->n
 Route::get('/jenis_pembayaran/{id}/edit', [JenisPembayaranController::class, 'edit'])->name('jenis_pembayaran.edit');
 Route::PUT('/jenis_pembayaran/{id}', [JenisPembayaranController::class, 'update'])->name('jenis_pembayaran.update');
 Route::DELETE('/jenis_pembayaran/{id}', [JenisPembayaranController::class, 'destroy'])->name('jenis_pembayaran.destroy');
+Route::get('/jenis_pembayaran/{id}/payment_bebas', [JenisPembayaranController::class, 'payment_bebas']);
+Route::get('/jenis_pembayaran/{id}/get_payment_bebas', [JenisPembayaranController::class, 'get_payment_bebas']);
+Route::get('/jenis_pembayaran/{id}/create_payment_bebas', [JenisPembayaranController::class, 'add_payment_bebas']);
+Route::post('/jenis_pembayaran/{id}/payment_bebas', [JenisPembayaranController::class, 'store_payment_bebas']);
+Route::DELETE('/jenis_pembayaran/{id}/payment_bebas', [JenisPembayaranController::class, 'destroy_payment_bebas']);
+Route::get('/jenis_pembayaran/{id}/bulanan', [JenisPembayaranController::class, 'bulanan']);
