@@ -1,13 +1,12 @@
 <?php
 
+use App\Http\Controllers\BulanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisPembayaranController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\TahunAjaranController;
-use App\Http\Controllers\TahunPelajaranController;
-use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\Route;
 
 
@@ -50,4 +49,17 @@ Route::get('/jenis_pembayaran/{id}/get_payment_bebas', [JenisPembayaranControlle
 Route::get('/jenis_pembayaran/{id}/create_payment_bebas', [JenisPembayaranController::class, 'add_payment_bebas']);
 Route::post('/jenis_pembayaran/{id}/payment_bebas', [JenisPembayaranController::class, 'store_payment_bebas']);
 Route::DELETE('/jenis_pembayaran/{id}/payment_bebas', [JenisPembayaranController::class, 'destroy_payment_bebas']);
-Route::get('/jenis_pembayaran/{id}/bulanan', [JenisPembayaranController::class, 'bulanan']);
+Route::get('/jenis_pembayaran/{id}/payment_bulanan', [JenisPembayaranController::class, 'payment_bulanan']);
+Route::get('/jenis_pembayaran/{id}/get_payment_bulanan', [JenisPembayaranController::class, 'get_payment_bulanan']);
+Route::get('/jenis_pembayaran/{id}/create_payment_bulanan', [JenisPembayaranController::class, 'add_payment_bulanan']);
+Route::get('/jenis_pembayaran/{jenis_pembayaran_id}/payment_bulanan/{siswa_id}', [JenisPembayaranController::class, 'show_payment_bulanan']);
+Route::post('/jenis_pembayaran/{id}/payment_bulanan', [JenisPembayaranController::class, 'store_payment_bulanan']);
+Route::DELETE('/jenis_pembayaran/{id}/payment_bulanan', [JenisPembayaranController::class, 'destroy_payment_bulanan']);
+
+Route::get('/jenis_pembayaran/{id}/get', [JenisPembayaranController::class, 'get']);
+
+Route::get('/bulan', [BulanController::class, 'index'])->name('bulan.index');
+Route::post('/bulan', [BulanController::class, 'store'])->name('bulan.store');
+Route::get('/bulan/{id}', [BulanController::class, 'show'])->name('bulan.show');
+Route::PUT('/bulan/{id}', [BulanController::class, 'update'])->name('bulan.update');
+Route::DELETE('/bulan/{id}', [BulanController::class, 'destroy'])->name('bulan.destroy');

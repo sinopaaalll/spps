@@ -126,6 +126,21 @@
                       </a>
                   </li>
 
+                  <li class="pc-item pc-caption">
+                      <label>Setting</label>
+                      <i class="ti ti-dashboard"></i>
+                  </li>
+                  <li class="pc-item {{ Request::is('bulan*') ? 'active' : '' }}">
+                      <a href="{{ route('bulan.index') }}" class="pc-link">
+                          <span class="pc-micon">
+                              <svg class="pc-icon">
+                                  <use xlink:href="#custom-status-up"></use>
+                              </svg>
+                          </span>
+                          <span class="pc-mtext">Bulan</span>
+                      </a>
+                  </li>
+
                   <li class="pc-item pc-hasmenu">
                       <a href="#!" class="pc-link">
                           <span class="pc-micon">
@@ -139,7 +154,8 @@
                       </a>
                       <ul class="pc-submenu">
                           <li class="pc-item"><a class="pc-link" href="../dashboard/index.html">Default</a></li>
-                          <li class="pc-item"><a class="pc-link" href="../dashboard/analytics.html">Analytics</a></li>
+                          <li class="pc-item"><a class="pc-link" href="../dashboard/analytics.html">Analytics</a>
+                          </li>
                       </ul>
                   </li>
               </ul>

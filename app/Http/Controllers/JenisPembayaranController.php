@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bebas;
+use App\Models\Bulan;
+use App\Models\Bulanan;
 use App\Models\JenisPembayaran;
 use App\Models\Kelas;
 use App\Models\Pos;
@@ -188,18 +190,24 @@ class JenisPembayaranController extends Controller
     public function get_payment_bebas(string $id)
     {
         if (request()->ajax()) {
-            $data = Bebas::with(['siswa.kelas'])
-                ->where('jenis_pembayaran_id', $id)
-                ->whereHas('siswa', function ($query) {
-                    if (request()->has('kelas_id') && request('kelas_id') != '') {
-                        $query->where('kelas_id', request('kelas_id'));
-                    }
+            $data = Bebas::select(
+                'bebas.*',
+                'siswa.nis',
+                'siswa.nama',
+                'kelas.nama_kelas'
+            )
+                ->join('siswa', 'siswa.id', '=', 'bebas.siswa_id')
+                ->join('kelas', 'kelas.id', '=', 'siswa.kelas_id')
+                ->where('bebas.jenis_pembayaran_id', $id)
+                ->when(request('kelas_id'), function ($query) {
+                    $query->where('siswa.kelas_id', request('kelas_id'));
                 })
-                ->select('bebas.*');
+                ->orderBy('kelas.nama_kelas', 'asc');
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('kelas', function ($bebas) {
-                    return $bebas->siswa->kelas->nama_kelas ?? '-';
+                    return $bebas->nama_kelas ?? '-';
                 })
                 ->addColumn('bill', function ($bebas) {
                     return 'Rp. ' . number_format($bebas->bill, 0, ',', '.');
@@ -281,6 +289,188 @@ class JenisPembayaranController extends Controller
         DB::beginTransaction();
         try {
             $bebas->delete();
+            DB::commit();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Data berhasil dihapus'
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 422,
+                'message' => 'Data gagal dihapus'
+            ]);
+        }
+    }
+
+    public function payment_bulanan(string $id)
+    {
+        $jenis_pembayaran = JenisPembayaran::findOrFail($id);
+        $tahun_ajaran = TahunAjaran::where('id', $jenis_pembayaran->tahun_ajaran_id)->get();
+        $kelas = Kelas::all();
+        return view('pages.jenis-pembayaran.bulanan', compact('jenis_pembayaran', 'tahun_ajaran', 'kelas'));
+    }
+
+    public function get(string $id)
+    {
+        $data = Bulanan::select(
+            DB::raw('MIN(bulanan.id) as id'), // Ambil satu ID dari bulanan
+            'bulanan.siswa_id',
+            'siswa.nis',
+            'siswa.nama',
+            'kelas.nama_kelas',
+        )
+            ->join('siswa', 'siswa.id', '=', 'bulanan.siswa_id')
+            ->join('kelas', 'kelas.id', '=', 'siswa.kelas_id')
+            ->where('bulanan.jenis_pembayaran_id', $id)
+            ->when(request('kelas_id'), function ($query) {
+                $query->where('siswa.kelas_id', request('kelas_id'));
+            })
+            ->groupBy('bulanan.siswa_id', 'siswa.nis', 'siswa.nama', 'kelas.nama_kelas')
+            ->orderBy('kelas.nama_kelas', 'asc')
+            ->get();
+
+        dd($data);
+    }
+
+    public function get_payment_bulanan(string $id)
+    {
+        if (request()->ajax()) {
+            $data = Bulanan::select(
+                DB::raw('MIN(bulanan.id) as id'), // Ambil satu ID dari bulanan
+                'bulanan.siswa_id',
+                'bulanan.bill',
+                'bulanan.jenis_pembayaran_id',
+                'siswa.nis',
+                'siswa.nama',
+                'kelas.nama_kelas',
+            )
+                ->join('siswa', 'siswa.id', '=', 'bulanan.siswa_id')
+                ->join('kelas', 'kelas.id', '=', 'siswa.kelas_id')
+                ->where('bulanan.jenis_pembayaran_id', $id)
+                ->when(request('kelas_id'), function ($query) {
+                    $query->where('siswa.kelas_id', request('kelas_id'));
+                })
+                ->groupBy('bulanan.siswa_id', 'siswa.nis', 'siswa.nama', 'kelas.nama_kelas', 'bulanan.bill', 'bulanan.jenis_pembayaran_id')
+                ->orderBy('kelas.nama_kelas', 'asc')
+                ->get();
+
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('kelas', function ($bulanan) {
+                    return $bulanan->nama_kelas ?? '-';
+                })
+                ->addColumn('aksi', function ($bulanan) {
+
+                    $showBtn = '<a class="btn btn-icon btn-link-info" href="' .
+                        url('/jenis_pembayaran/' . $bulanan->jenis_pembayaran_id . '/payment_bulanan/' . $bulanan->siswa_id) . '">
+                            <span class="ti ti-eye f-18"></span>
+                        </a>';
+
+
+                    $delBtn = '<button class="btn btn-icon btn-link-danger btn-hapus" 
+                                    data-url="' . url('/jenis_pembayaran/' . '__ID__' . '/payment_bulanan') . '" 
+                                    data-id="' . $bulanan->siswa_id . '" 
+                                    data-table="tarif-bulanan-table">
+                                    <span class="ti ti-trash f-18"></span>
+                                </button>';
+
+                    return  $showBtn . $delBtn;
+                })
+                ->rawColumns([
+                    'aksi',
+                ])
+                ->make(true);
+        }
+    }
+
+    public function add_payment_bulanan(string $id)
+    {
+        $jenis_pembayaran = JenisPembayaran::findOrFail($id);
+        $tahun_ajaran = TahunAjaran::where('id', $jenis_pembayaran->tahun_ajaran_id)->get();
+        $kelas = Kelas::all();
+        $bulan = Bulan::all();
+
+        return view('pages.jenis-pembayaran.payment_bulanan', compact('jenis_pembayaran', 'tahun_ajaran', 'kelas', 'bulan'));
+    }
+
+    public function show_payment_bulanan(string $jenis_pembayaran_id, string $siswa_id)
+    {
+        $bulanan = Bulanan::with('bulan')->where('siswa_id', $siswa_id)->get();
+
+        // dd($bulanan);
+        $jenis_pembayaran = JenisPembayaran::findOrFail($jenis_pembayaran_id);
+        $tahun_ajaran = TahunAjaran::where('id', $jenis_pembayaran->tahun_ajaran_id)->get();
+        $siswa = Siswa::with('kelas')->findOrFail($siswa_id);
+
+        return view('pages.jenis-pembayaran.show_payment_bulanan', compact('bulanan', 'jenis_pembayaran', 'tahun_ajaran', 'siswa'));
+    }
+
+    public function store_payment_bulanan(Request $request, string $id)
+    {
+        $request->validate([
+            'kelas' => ['required'],
+            'bill' => ['required', 'array'],
+            'bill.*' => ['required'],
+        ], [
+            'kelas.required' => 'Kelas tidak boleh kosong.',
+            'bill.required' => 'Tarif tidak boleh kosong.',
+            'bill.array' => 'Tarif harus berupa array.',
+            'bill.*.required' => 'Setiap tarif tidak boleh kosong.',
+        ]);
+
+        // dd($request->all());
+
+        $siswa = Siswa::where('kelas_id', $request->kelas)
+            ->where('status', 'aktif')
+            ->get();
+
+        DB::beginTransaction();
+        try {
+
+            foreach ($siswa as $item) {
+                foreach ($request->bill as $key => $value) {
+                    $exists = Bulanan::where('siswa_id', $item->id)
+                        ->where('bulan_id', $key)
+                        ->where('jenis_pembayaran_id', $id)
+                        ->exists();
+
+                    if ($exists) {
+                        // Jika ada data duplikat, rollback dan return error
+                        DB::rollBack();
+                        return redirect('/jenis_pembayaran/' . $id . '/payment_bulanan')
+                            ->with('error', 'Data duplikasi! Siswa ini sudah memiliki tarif untuk bulan ini.');
+                    }
+
+                    Bulanan::create([
+                        'bulan_id' => $key,
+                        'siswa_id' => $item->id,
+                        'jenis_pembayaran_id' => $id,
+                        'status' => 0,
+                        'bill' => (int) Str::replace(['Rp.', '.', ','], '', $value),
+                        'created_at' => Carbon::now(),
+                    ]);
+                }
+            }
+
+
+            DB::commit();
+            return redirect('/jenis_pembayaran/' . $id . '/payment_bulanan')->with('success', 'Data berhasil disimpan!');
+        } catch (\Throwable $th) {
+            //throw $th;
+            DB::rollBack();
+            return redirect('/jenis_pembayaran/' . $id . '/payment_bulanan')->with('error', 'Data gagal disimpan!');
+        }
+    }
+
+    public function destroy_payment_bulanan(string $id)
+    {
+
+        DB::beginTransaction();
+        try {
+
+            Bulanan::where('siswa_id', $id)->delete();
+
             DB::commit();
             return response()->json([
                 'status' => 200,

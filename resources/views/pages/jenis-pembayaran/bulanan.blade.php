@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Tarif Bebas')
+@section('title', 'Tarif Bulanan')
 @section('breadcrumb', 'Jenis Pembayaran')
-@section('breadcrumb-text', 'Data Tarif Bebas')
+@section('breadcrumb-text', 'Data Tarif Bulanan')
 
 @section('url')
     {{ route('jenis_pembayaran.index') }}
@@ -52,7 +52,7 @@
                             <h5>Setting Tarif</h5>
                         </div>
                         <div class="col-lg-10">
-                            <a href="{{ url('jenis_pembayaran/' . $jenis_pembayaran->id . '/create_payment_bebas') }}"
+                            <a href="{{ url('jenis_pembayaran/' . $jenis_pembayaran->id . '/create_payment_bulanan') }}"
                                 class="btn btn-primary"><span class="fa fa-plus"></span> Berdasarkan
                                 Kelas</a>
                             <a href="{{ route('jenis_pembayaran.index') }}" class="btn  btn-warning"><span
@@ -65,14 +65,13 @@
 
             <div class="card">
                 <div class="card-body">
-                    <table class="table table-striped" id="tarif-bebas-table">
+                    <table class="table table-striped" id="tarif-bulanan-table">
                         <thead>
                             <tr>
                                 <th>#</th>
                                 <th>NIS</th>
                                 <th>Nama</th>
                                 <th>Kelas</th>
-                                <th>Tagihan</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -99,11 +98,11 @@
 
     <script>
         $(document).ready(function() {
-            let table = $('#tarif-bebas-table').DataTable({
+            let table = $('#tarif-bulanan-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ url('/jenis_pembayaran/' . $jenis_pembayaran->id . '/get_payment_bebas') }}",
+                    url: "{{ url('/jenis_pembayaran/' . $jenis_pembayaran->id . '/get_payment_bulanan') }}",
                     data: function(d) {
                         d.kelas_id = $('#kelas_id').val();
                     }
@@ -130,10 +129,6 @@
                         name: 'kelas'
                     },
                     {
-                        data: 'bill',
-                        name: 'bill'
-                    },
-                    {
                         data: 'aksi',
                         orderable: false,
                         searchable: false
@@ -141,7 +136,6 @@
                 ]
             });
 
-            // Reload table saat tombol "Cari" diklik
             $(document).on('change', '#kelas_id', function() {
                 table.ajax.reload();
             });
