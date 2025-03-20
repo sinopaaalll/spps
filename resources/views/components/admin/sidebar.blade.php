@@ -102,6 +102,22 @@
                   </li>
 
                   <li class="pc-item pc-caption">
+                      <label>Pembayaran</label>
+                      <i class="ti ti-dashboard"></i>
+                  </li>
+
+                  <li class="pc-item {{ Request::is('payout*') ? 'active' : '' }}">
+                      <a href="{{ route('payout.index') }}" class="pc-link">
+                          <span class="pc-micon">
+                              <svg class="pc-icon">
+                                  <use xlink:href="#custom-status-up"></use>
+                              </svg>
+                          </span>
+                          <span class="pc-mtext">Pembayaran Siswa</span>
+                      </a>
+                  </li>
+
+                  <li class="pc-item pc-caption">
                       <label>Keuangan</label>
                       <i class="ti ti-dashboard"></i>
                   </li>

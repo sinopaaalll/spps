@@ -4,6 +4,7 @@ use App\Http\Controllers\BulanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisPembayaranController;
 use App\Http\Controllers\KelasController;
+use App\Http\Controllers\PayoutController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\TahunAjaranController;
@@ -63,3 +64,7 @@ Route::post('/bulan', [BulanController::class, 'store'])->name('bulan.store');
 Route::get('/bulan/{id}', [BulanController::class, 'show'])->name('bulan.show');
 Route::PUT('/bulan/{id}', [BulanController::class, 'update'])->name('bulan.update');
 Route::DELETE('/bulan/{id}', [BulanController::class, 'destroy'])->name('bulan.destroy');
+
+Route::get('/payout', [PayoutController::class, 'index'])->name('payout.index');
+Route::PUT('/payout/bulanan/pay/{siswa_id}/{jenis_pembayaran_id}/{bulan_id}', [PayoutController::class, 'bulanan_pay'])->name('payout.bulanan.pay');
+Route::PUT('/payout/bulanan/no_pay/{siswa_id}/{jenis_pembayaran_id}/{bulan_id}', [PayoutController::class, 'bulanan_no_pay'])->name('payout.bulanan.no_pay');
