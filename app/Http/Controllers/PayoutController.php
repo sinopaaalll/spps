@@ -38,30 +38,18 @@ class PayoutController extends Controller
             if (!$siswa) {
                 return redirect()->back()->with('error', 'Data siswa tidak ditemukan.');
             }
-            $bulanan = Bulanan::select(
-                'bulanan.siswa_id',
-                'bulanan.jenis_pembayaran_id',
-                'bulanan.bulan_id',
-                'bulanan.bill',
-                'bulanan.status',
-                'bulanan.tanggal',
-                'jenis_pembayaran.pos_id',
-                'pos.nama as nama_pembayaran',
-                'jenis_pembayaran.tahun_ajaran_id',
-                'pos.nama as nama_pos',
-                'tahun_ajaran.tahun_awal',
-                'tahun_ajaran.tahun_akhir',
-            )
-                ->join('jenis_pembayaran', 'bulanan.jenis_pembayaran_id', '=', 'jenis_pembayaran.id')
-                ->join('pos', 'jenis_pembayaran.pos_id', '=', 'pos.id')
-                ->join('tahun_ajaran', 'jenis_pembayaran.tahun_ajaran_id', '=', 'tahun_ajaran.id')
-                ->where('jenis_pembayaran.id', $jenis_pembayaran->id)
-                ->where('bulanan.siswa_id', $siswa->id)
+
+
+            $bulanan = Bulanan::with([
+                'jenis_pembayaran.pos',
+                'jenis_pembayaran.tahun_ajaran'
+            ])
+                ->where('jenis_pembayaran_id', $jenis_pembayaran->id)
+                ->where('siswa_id', $siswa->id)
                 ->get()
                 ->groupBy('jenis_pembayaran_id');
 
-            // dd($bulanan);
-
+            dd($bulanan);
         }
 
         return view("pages.payout.index", compact('tahun_ajaran', 'siswa', 'ta_selected', 'bulan', 'bulanan'));

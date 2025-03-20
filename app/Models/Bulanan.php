@@ -22,4 +22,9 @@ class Bulanan extends Model
     {
         return $this->belongsTo(Bulan::class, 'bulan_id');
     }
+
+    public function jenis_pembayaran()
+    {
+        return $this->belongsTo(JenisPembayaran::class, 'jenis_pembayaran_id');
+    }
 }

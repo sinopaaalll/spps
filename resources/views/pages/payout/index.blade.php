@@ -153,7 +153,7 @@
                                                 $totalSudahDibayar = $items->where('status', 1)->sum('bill');
 
                                                 $totalTagihan = $totalSemuaTagihan - $totalSudahDibayar;
-                                                $namaPembayaran = "{$firstItem->nama_pembayaran} T.A {$firstItem->tahun_awal}/{$firstItem->tahun_akhir}";
+                                                $namaPembayaran = "{$firstItem->jenis_pembayaran->pos->nama} T.A {$firstItem->jenis_pembayaran->tahun_ajaran->tahun_awal}/{$firstItem->jenis_pembayaran->tahun_ajaran->tahun_akhir}";
                                             @endphp
                                             <tr>
                                                 <td>{{ $no++ }}</td>
