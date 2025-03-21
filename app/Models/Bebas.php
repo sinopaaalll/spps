@@ -17,4 +17,9 @@ class Bebas extends Model
     {
         return $this->belongsTo(Siswa::class, 'siswa_id');
     }
+
+    public function jenis_pembayaran()
+    {
+        return $this->belongsTo(JenisPembayaran::class, 'jenis_pembayaran_id');
+    }
 }

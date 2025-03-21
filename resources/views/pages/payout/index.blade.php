@@ -220,18 +220,72 @@
                                     </tbody>
                                 </table>
                             </div>
+
                             <div class="tab-pane fade" id="bebas" role="tabpanel" aria-labelledby="bebas-tab">
-                                <p class="mb-0">It is a long established fact that a reader will be distracted by the
-                                    readable
-                                    content of a page when looking at its layout. The point of using Lorem Ipsum is that it
-                                    has a
-                                    more-or-less normal distribution of letters, as opposed to using 'Content here, content
-                                    here',
-                                    making it look like readable English. Many desktop publishing packages and web page
-                                    editors now
-                                    use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover
-                                    many
-                                    web sites still in their infancy.</p>
+                                @php
+                                    $url_refresh = route('payout.index', [
+                                        't' => request()->t,
+                                        'n' => request()->n,
+                                    ]);
+                                @endphp
+                                <a href="{{ $url_refresh }}" class="badge bg-primary"><span class="fa fa-undo"></span>
+                                    Refresh</a>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama Pembayaran</th>
+                                            <th>Tagihan</th>
+                                            <th>Sisa bayar</th>
+                                            <th>Dibayar</th>
+                                            <th>Status</th>
+                                            <th>Bayar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($bebas as $items)
+                                            @php
+                                                $namaPembayaran = "{$items->jenis_pembayaran->pos->nama} T.A {$items->jenis_pembayaran->tahun_ajaran->tahun_awal}/{$items->jenis_pembayaran->tahun_ajaran->tahun_akhir}";
+
+                                                $sisaBayar = $items->bill - $items->total_pay;
+                                                if ($sisaBayar == 0) {
+                                                    $status = 'Lunas';
+                                                    $class = 'badge bg-success';
+                                                } else {
+                                                    $status = 'Belum Lunas';
+                                                    $class = 'badge bg-warning';
+                                                }
+
+                                                $status == 'Lunas' ? ($disable = 'disabled') : ($disable = null);
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $namaPembayaran }}</td>
+                                                <td>{{ number_format($items->bill, 0, ',', '.') }}</td>
+                                                <td>{{ number_format($sisaBayar, 0, ',', '.') }}</td>
+                                                <td>{{ number_format($items->total_pay, 0, ',', '.') }}</td>
+                                                <td>
+                                                    @php
+                                                        $url_detail = route('payout.bebas.detail', [
+                                                            'bebas_id' => $items->id,
+                                                            'siswa_id' => $items->siswa_id,
+                                                            'jenis_pembayaran_id' => $items->jenis_pembayaran_id,
+                                                        ]);
+                                                    @endphp
+                                                    <button id="detail" data-url="{{ $url_detail }}"
+                                                        class="{{ $class }}">
+                                                        {{ $status }}
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <button type="button" id="bayar" class="badge bg-success"
+                                                        {{ $disable }}><span class=""></span> Bayar</button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -239,11 +293,112 @@
             </div>
 
         </div>
+
+
+        <div id="bebasFormModal" class="modal modal-lg fade" tabindex="-1" role="dialog"
+            aria-labelledby="bebasFormModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bebasFormModalLabel">Form Pembayaran Bebas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    @php
+                        $url = route('payout.bebas.pay', [
+                            'siswa_id' => $siswa->id,
+                            'jenis_pembayaran_id' => $jenis_pembayaran_bebas->id,
+                        ]);
+                    @endphp
+                    <form id="bebasForm" action="{{ $url }}" method="post" autocomplete="off">
+                        @csrf
+                        <div class="modal-body">
+                            @foreach ($bebas as $value)
+                                @php
+                                    $namaPembayaran = "{$value->jenis_pembayaran->pos->nama} T.A {$value->jenis_pembayaran->tahun_ajaran->tahun_awal}/{$value->jenis_pembayaran->tahun_ajaran->tahun_akhir}";
+                                @endphp
+
+                                <input type="hidden" id="bebas_id" name="bebas_id" value="{{ $value->id }}">
+                                <div class="form-group row">
+                                    <label for="jenis_pembayaran" class="col-lg-3 col-form-label text-lg-end">Nama
+                                        Pembayaran</label>
+                                    <div class="col-lg-9">
+                                        <input type="text" id="jenis_pembayaran" name="jenis_pembayaran"
+                                            class="form-control" value="{{ $namaPembayaran }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="tanggal" class="col-lg-3 col-form-label text-lg-end">Tanggal
+                                        Bayar</label>
+                                    <div class="col-lg-9">
+                                        <input type="date" id="tanggal" name="tanggal" class="form-control"
+                                            value="{{ date('Y-m-d') }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="total_pay" class="col-lg-3 col-form-label text-lg-end">Jumlah
+                                        Dibayar*</label>
+                                    <div class="col-lg-9">
+                                        <input type="text" id="total_pay" name="total_pay" class="form-control"
+                                            value="">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="keterangan" class="col-lg-3 col-form-label text-lg-end">Keterangan</label>
+                                    <div class="col-lg-9">
+                                        <input type="text" id="keterangan" name="keterangan" class="form-control"
+                                            value="">
+                                    </div>
+                                </div>
+                            @endforeach
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary" id="save">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="detailBebasFormModal" class="modal modal-lg fade" tabindex="-1" role="dialog"
+            aria-labelledby="detailBebasFormModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detailBebasFormModalLabel">Liha Pembayaran/Cicilan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="pay-table">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tanggal</th>
+                                    <th>Dibayar</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     @endif
 
 @endsection
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins/dataTables.bootstrap5.min.css') }}">
+@endpush
+
 @push('custom-scripts')
+    <script src="{{ asset('assets/js/plugins/imask.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugins/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugins/dataTables.bootstrap5.min.js') }}"></script>
+
     <script>
         $(document).ready(function() {
             $(".update-form").on("submit", function(e) {
@@ -271,6 +426,75 @@
                     }
                 });
             });
+
+            $('#bayar').on('click', function() {
+                $('#bebasFormModal').modal('show');
+            });
+
+            var $totalPayInput = $('input[name="total_pay"]');
+            $totalPayInput.on("mouseenter", function() {
+                $(this).focus();
+            });
+
+            var totalPayMask = IMask($totalPayInput[0], {
+                mask: 'Rp. num',
+                blocks: {
+                    num: {
+                        mask: Number,
+                        thousandsSeparator: ','
+                    }
+                }
+            });
+
+            $('#detail').on('click', function() {
+                var url = $(this).data('url');
+                $('#detailBebasFormModal').modal('show');
+
+                $('#pay-table').DataTable().destroy(); // Hancurkan DataTable sebelum reload
+                $('#pay-table').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: url,
+                        type: "GET",
+                    },
+                    columns: [{
+                            data: "DT_RowIndex",
+                            name: "DT_RowIndex"
+                        },
+                        {
+                            data: "tanggal",
+                            name: "tanggal",
+                            render: function(data) {
+                                if (data) {
+                                    let date = new Date(data);
+                                    return date.toLocaleDateString("id-ID", {
+                                        day: "2-digit",
+                                        month: "2-digit",
+                                        year: "numeric"
+                                    });
+                                }
+                                return "-";
+                            }
+                        },
+                        {
+                            data: "pay_bill",
+                            name: "pay_bill",
+                            render: function(data) {
+                                return 'Rp. ' + parseFloat(data).toLocaleString();
+                            }
+                        },
+                        {
+                            data: "aksi",
+                            name: "aksi",
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+                });
+            });
+
+
         });
     </script>
 @endpush

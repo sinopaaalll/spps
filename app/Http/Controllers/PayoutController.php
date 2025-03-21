@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bebas;
+use App\Models\BebasPay;
 use App\Models\Bulan;
 use App\Models\Bulanan;
 use App\Models\JenisPembayaran;
@@ -10,6 +12,8 @@ use App\Models\TahunAjaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Yajra\DataTables\DataTables;
 
 class PayoutController extends Controller
 {
@@ -18,7 +22,9 @@ class PayoutController extends Controller
         $siswa = null;
         $bulan = null;
         $bulanan = null;
-        $jenis_pembayaran = null;
+        $bebas = null;
+        $jenis_pembayaran_bulanan = null;
+        $jenis_pembayaran_bebas = null;
         $ta_selected = null;
         $tahun_ajaran = TahunAjaran::all();
 
@@ -26,11 +32,14 @@ class PayoutController extends Controller
             $siswa = Siswa::with(['kelas', 'bulanan'])->where('nis', $request->n)->first();
             $ta_selected = TahunAjaran::findOrFail($request->t);
             $bulan = Bulan::all();
-            $jenis_pembayaran = JenisPembayaran::where('tipe', 'bulanan')
+            $jenis_pembayaran_bulanan = JenisPembayaran::where('tipe', 'bulanan')
+                ->where('tahun_ajaran_id', $request->t)
+                ->first();
+            $jenis_pembayaran_bebas = JenisPembayaran::where('tipe', 'bebas')
                 ->where('tahun_ajaran_id', $request->t)
                 ->first();
 
-            if (!$jenis_pembayaran) {
+            if (!$jenis_pembayaran_bulanan) {
                 return redirect()->back()->with('error', 'Jenis pembayaran tidak ditemukan.');
             }
 
@@ -39,20 +48,26 @@ class PayoutController extends Controller
                 return redirect()->back()->with('error', 'Data siswa tidak ditemukan.');
             }
 
-
             $bulanan = Bulanan::with([
                 'jenis_pembayaran.pos',
                 'jenis_pembayaran.tahun_ajaran'
             ])
-                ->where('jenis_pembayaran_id', $jenis_pembayaran->id)
+                ->where('jenis_pembayaran_id', $jenis_pembayaran_bulanan->id)
                 ->where('siswa_id', $siswa->id)
                 ->get()
                 ->groupBy('jenis_pembayaran_id');
 
-            dd($bulanan);
+            $bebas = Bebas::with([
+                'jenis_pembayaran.pos',
+                'jenis_pembayaran.tahun_ajaran'
+            ])
+                ->where('jenis_pembayaran_id', $jenis_pembayaran_bebas->id)
+                ->where('siswa_id', $siswa->id)->get();
+
+            // dd($bebas);
         }
 
-        return view("pages.payout.index", compact('tahun_ajaran', 'siswa', 'ta_selected', 'bulan', 'bulanan'));
+        return view("pages.payout.index", compact('tahun_ajaran', 'siswa', 'ta_selected', 'bulan', 'bulanan', 'bebas', 'jenis_pembayaran_bebas'));
     }
 
     public function bulanan_pay($siswa_id, $jenis_pembayaran_id, $bulan_id)
@@ -123,6 +138,108 @@ class PayoutController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan saat menyimpan data.');
+        }
+    }
+
+    public function bebas_pay(Request $request, $siswa_id, $jenis_pembayaran_id)
+    {
+        $request->validate([
+            'total_pay' => ['required']
+        ]);
+
+        $siswa = Siswa::findOrFail($siswa_id);
+        $tahunAjaranId = JenisPembayaran::where('id', $jenis_pembayaran_id)->value('tahun_ajaran_id');
+        $bebas = Bebas::findOrFail($request->bebas_id);
+
+        $today = Carbon::now()->format('Ymd');
+        $lastNumber = BebasPay::whereDate('tanggal', Carbon::today())
+            ->whereNotNull('number_pay')
+            ->orderBy('number_pay', 'desc')
+            ->value('number_pay');
+
+        $nextNumber = $lastNumber ? (intval(substr($lastNumber, -4)) + 1) : 1;
+        $numberPay = $today . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+        $pay_bill = (int) Str::replace(['Rp.', '.', ','], '', $request->total_pay);
+
+        DB::beginTransaction();
+        try {
+
+            BebasPay::create([
+                'bebas_id' => $request->bebas_id,
+                'number_pay' => $numberPay,
+                'tanggal' => Carbon::now()->format('Y-m-d'),
+                'pay_bill' => $pay_bill,
+                'keterangan' => $request->keterangan,
+                'created_at' => Carbon::now(),
+            ]);
+
+            $totalPay = BebasPay::where('bebas_id', $request->bebas_id)->sum('pay_bill');
+            $bebas->update([
+                'total_pay' => $totalPay
+            ]);
+
+            DB::commit();
+            return redirect()->route('payout.index', [
+                't' => $tahunAjaranId,
+                'n' => $siswa->nis
+            ])->with('success', 'Tagihan Berhasil dibayar');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan data.');
+        }
+    }
+
+    public function bebas_detail($bebas_id, $siswa_id, $jenis_pembayaran_id)
+    {
+        if (request()->ajax()) {
+            $data = BebasPay::where('bebas_id', $bebas_id)
+                ->orderBy('tanggal', 'asc')
+                ->get();
+
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('aksi', function ($payout) {
+
+                    $delBtn = '<button class="btn btn-icon btn-link-danger btn-hapus" 
+                    data-url="' . route('payout.bebas.destroy', '__ID__') . '" 
+                    data-id="' . $payout->id . '" 
+                    data-table="pay-table">
+                    <span class="ti ti-trash f-18"></span>
+                </button>';
+
+                    return $delBtn;
+                })
+                ->rawColumns([
+                    'aksi',
+                ])
+                ->make(true);
+        }
+    }
+
+    public function bebas_destroy(string $id)
+    {
+        $bebasPay = BebasPay::findOrFail($id);
+        $bebas = Bebas::findOrFail($bebasPay->bebas_id);
+        DB::beginTransaction();
+        try {
+            $total_pay = $bebas->total_pay - $bebasPay->pay_bill;
+            $bebas->update([
+                'total_pay' => $total_pay,
+            ]);
+
+            $bebasPay->delete();
+            DB::commit();
+            return response()->json([
+                'status' => 200,
+                'message' => 'Data berhasil dihapus'
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 422,
+                'message' => 'Data gagal dihapus'
+            ]);
         }
     }
 }
