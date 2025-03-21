@@ -21,7 +21,7 @@
     </style>
     <style type="text/css">
         @page {
-            margin-top: 5cm;
+            margin-top: 2cm;
             margin-bottom: 0.1em;
             margin-left: 5.0em;
             margin-right: 5.0em;
@@ -40,7 +40,7 @@
             font-size: 14pt;
             text-align: center;
             font-weight: bold;
-            padding-bottom: -10px;
+            margin-bottom: -10px;
         }
 
         .tp {
@@ -155,13 +155,6 @@
             <td><strong><u><span class="upper">( Administrator )</span></u></strong></td>
         </tr>
     </table>
-
-    <script>
-        window.onload = function() {
-            window.print();
-        };
-    </script>
-
 
 </body>
 

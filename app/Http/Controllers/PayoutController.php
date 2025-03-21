@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Yajra\DataTables\DataTables;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class PayoutController extends Controller
 {
@@ -323,8 +325,10 @@ class PayoutController extends Controller
                     ->where('tipe', 'bebas');
             })->get();
 
-        // dd([$siswa, $tahun_ajaran, $bulanan, $bebas]);
 
-        return view('pages.payout.print', compact('siswa', 'tahun_ajaran', 'bulanan', 'bebas'));
+        $pdf = PDF::loadView('pages.payout.print', compact('siswa', 'tahun_ajaran', 'bulanan', 'bebas'))
+            ->setPaper('A4', 'landscape');
+
+        return $pdf->stream('Surat_Tagihan_' . $siswa->nama . '.pdf');
     }
 }
