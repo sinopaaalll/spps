@@ -82,12 +82,17 @@ class JenisPembayaranController extends Controller
     {
         $request->validate([
             'pos_id' => ['required'],
-            'tahun_ajaran_id' => ['required', 'unique:jenis_pembayaran'],
+            'tahun_ajaran_id' => [
+                'required',
+                Rule::unique('jenis_pembayaran')->where(function ($query) use ($request) {
+                    return $query->where('pos_id', $request->pos_id);
+                }),
+            ],
             'tipe' => ['required'],
         ], [
             'pos_id.required' => 'Pos wajib dipilih.',
             'tahun_ajaran_id.required' => 'Tahun Ajaran wajib dipilih.',
-            'tahun_ajaran_id.unique' => 'Tahun Ajaran sudah ada, silahkan pilih yang lain.',
+            'tahun_ajaran_id.unique' => 'Pos dan Tahun Ajaran sudah ada, silahkan pilih yang lain.',
             'status.required' => 'Status wajib dipilih.',
         ]);
 
@@ -135,12 +140,17 @@ class JenisPembayaranController extends Controller
         $jenis_pembayaran = JenisPembayaran::findOrFail($id);
         $request->validate([
             'pos_id' => ['required'],
-            'tahun_ajaran_id' => ['required', Rule::unique('jenis_pembayaran', 'tahun_ajaran_id')->ignore($jenis_pembayaran)],
+            'tahun_ajaran_id' => [
+                'required',
+                Rule::unique('jenis_pembayaran', 'tahun_ajaran_id')
+                    ->where('pos_id', $request->pos_id) // Pastikan kombinasi unik
+                    ->ignore($jenis_pembayaran->id), // Abaikan data yang sedang diedit
+            ],
             'tipe' => ['required'],
         ], [
             'pos_id.required' => 'Pos wajib dipilih.',
             'tahun_ajaran_id.required' => 'Tahun Ajaran wajib dipilih.',
-            'tahun_ajaran_id.unique' => 'Tahun Ajaran sudah ada, silahkan pilih yang lain.',
+            'tahun_ajaran_id.unique' => 'Pos dan Tahun Ajaran sudah ada, silahkan pilih yang lain.',
             'status.required' => 'Status wajib dipilih.',
         ]);
 

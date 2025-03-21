@@ -71,3 +71,4 @@ Route::PUT('/payout/bulanan/no_pay/{siswa_id}/{jenis_pembayaran_id}/{bulan_id}',
 Route::post('/payout/bebas/pay/{siswa_id}/{jenis_pembayaran_id}', [PayoutController::class, 'bebas_pay'])->name('payout.bebas.pay');
 Route::get('/payout/bebas/pay/detail/{bebas_id}/{siswa_id}/{jenis_pembayaran_id}', [PayoutController::class, 'bebas_detail'])->name('payout.bebas.detail');
 Route::delete('/payout/bebas/pay/destroy/{id}', [PayoutController::class, 'bebas_destroy'])->name('payout.bebas.destroy');
+Route::get('/payout/print/', [PayoutController::class, 'print'])->name('payout.print');

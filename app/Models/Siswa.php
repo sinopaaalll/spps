@@ -20,6 +20,6 @@ class Siswa extends Model
 
     public function bulanan()
     {
-        return $this->hasMany(Bulanan::class, 'siswa_id');
+        return $this->hasMany(Bulanan::class, 'bulan_id');
     }
 }

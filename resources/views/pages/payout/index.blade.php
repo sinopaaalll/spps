@@ -61,7 +61,13 @@
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h5>Informasi Siswa</h5>
                         <div class="card-tools text-end">
-                            <a href="{{ route('payout.index') }}" class="btn btn-sm btn-danger">
+                            @php
+                                $url_print = route('payout.print', [
+                                    't' => request()->t,
+                                    'n' => request()->n,
+                                ]);
+                            @endphp
+                            <a href="{{ $url_print }}" class="btn btn-sm btn-danger" target="_blank">
                                 <span class="fa fa-print"></span>&nbsp; Cetak Semua Tagihan
                             </a>
                         </div>
@@ -102,14 +108,26 @@
                 <div class="card">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h5>Transaksi Terakhir</h5>
-                        {{-- <div class="card-tools text-end">
-                            <a href="" class="btn btn-sm btn-primary">
-                                <span class="fa fa-arrow-left"></span>&nbsp; Kembali
-                            </a>
-                        </div> --}}
                     </div>
                     <div class="card-body">
-
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Pembayaran</th>
+                                    <th>Tagihan</th>
+                                    <th>Tanggal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($logs_trx as $logs)
+                                    <tr>
+                                        <td>{{ $logs->pembayaran }}</td>
+                                        <td>{{ 'Rp. ' . number_format($logs->bill, 0, ',', '.') }} </td>
+                                        <td>{{ \Carbon\Carbon::parse($logs->tanggal)->translatedFormat('d F Y') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -153,7 +171,7 @@
                                                 $totalSudahDibayar = $items->where('status', 1)->sum('bill');
 
                                                 $totalTagihan = $totalSemuaTagihan - $totalSudahDibayar;
-                                                $namaPembayaran = "{$firstItem->jenis_pembayaran->pos->nama} T.A {$firstItem->jenis_pembayaran->tahun_ajaran->tahun_awal}/{$firstItem->jenis_pembayaran->tahun_ajaran->tahun_akhir}";
+                                                $namaPembayaran = "{$firstItem->jenis_pembayaran->pos->nama} - T.A {$firstItem->jenis_pembayaran->tahun_ajaran->tahun_awal}/{$firstItem->jenis_pembayaran->tahun_ajaran->tahun_akhir}";
                                             @endphp
                                             <tr>
                                                 <td>{{ $no++ }}</td>
@@ -245,7 +263,12 @@
                                     <tbody>
                                         @foreach ($bebas as $items)
                                             @php
-                                                $namaPembayaran = "{$items->jenis_pembayaran->pos->nama} T.A {$items->jenis_pembayaran->tahun_ajaran->tahun_awal}/{$items->jenis_pembayaran->tahun_ajaran->tahun_akhir}";
+                                                $url = route('payout.bebas.pay', [
+                                                    'siswa_id' => $siswa->id,
+                                                    'jenis_pembayaran_id' => $items->jenis_pembayaran_id,
+                                                ]);
+
+                                                $namaPembayaran = "{$items->jenis_pembayaran->pos->nama} - T.A {$items->jenis_pembayaran->tahun_ajaran->tahun_awal}/{$items->jenis_pembayaran->tahun_ajaran->tahun_akhir}";
 
                                                 $sisaBayar = $items->bill - $items->total_pay;
                                                 if ($sisaBayar == 0) {
@@ -272,14 +295,17 @@
                                                             'jenis_pembayaran_id' => $items->jenis_pembayaran_id,
                                                         ]);
                                                     @endphp
-                                                    <button id="detail" data-url="{{ $url_detail }}"
-                                                        class="{{ $class }}">
+                                                    <button data-url="{{ $url_detail }}"
+                                                        class="detail-btn {{ $class }}">
                                                         {{ $status }}
                                                     </button>
                                                 </td>
                                                 <td>
-                                                    <button type="button" id="bayar" class="badge bg-success"
-                                                        {{ $disable }}><span class=""></span> Bayar</button>
+                                                    <button type="button" class="badge bg-success bayar-btn"
+                                                        data-url="{{ $url }}" data-id="{{ $items->id }}"
+                                                        data-name="{{ $namaPembayaran }}"
+                                                        {{ $disable }}><span></span>
+                                                        Bayar</button>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -303,53 +329,43 @@
                         <h5 class="modal-title" id="bebasFormModalLabel">Form Pembayaran Bebas</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    @php
-                        $url = route('payout.bebas.pay', [
-                            'siswa_id' => $siswa->id,
-                            'jenis_pembayaran_id' => $jenis_pembayaran_bebas->id,
-                        ]);
-                    @endphp
-                    <form id="bebasForm" action="{{ $url }}" method="post" autocomplete="off">
+                    <form id="bebasForm" action="" method="post" autocomplete="off">
                         @csrf
                         <div class="modal-body">
-                            @foreach ($bebas as $value)
-                                @php
-                                    $namaPembayaran = "{$value->jenis_pembayaran->pos->nama} T.A {$value->jenis_pembayaran->tahun_ajaran->tahun_awal}/{$value->jenis_pembayaran->tahun_ajaran->tahun_akhir}";
-                                @endphp
 
-                                <input type="hidden" id="bebas_id" name="bebas_id" value="{{ $value->id }}">
-                                <div class="form-group row">
-                                    <label for="jenis_pembayaran" class="col-lg-3 col-form-label text-lg-end">Nama
-                                        Pembayaran</label>
-                                    <div class="col-lg-9">
-                                        <input type="text" id="jenis_pembayaran" name="jenis_pembayaran"
-                                            class="form-control" value="{{ $namaPembayaran }}" readonly>
-                                    </div>
+                            <input type="text" id="bebas_id" name="bebas_id" value="">
+                            <div class="form-group row">
+                                <label for="name" class="col-lg-3 col-form-label text-lg-end">Nama
+                                    Pembayaran</label>
+                                <div class="col-lg-9">
+                                    <input type="text" id="name" class="form-control" value="" readonly>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="tanggal" class="col-lg-3 col-form-label text-lg-end">Tanggal
-                                        Bayar</label>
-                                    <div class="col-lg-9">
-                                        <input type="date" id="tanggal" name="tanggal" class="form-control"
-                                            value="{{ date('Y-m-d') }}" readonly>
-                                    </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="tanggal" class="col-lg-3 col-form-label text-lg-end">Tanggal
+                                    Bayar</label>
+                                <div class="col-lg-9">
+                                    <input type="date" id="tanggal" name="tanggal" class="form-control"
+                                        value="{{ date('Y-m-d') }}" readonly>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="total_pay" class="col-lg-3 col-form-label text-lg-end">Jumlah
-                                        Dibayar*</label>
-                                    <div class="col-lg-9">
-                                        <input type="text" id="total_pay" name="total_pay" class="form-control"
-                                            value="">
-                                    </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="total_pay" class="col-lg-3 col-form-label text-lg-end">Jumlah
+                                    Dibayar*</label>
+                                <div class="col-lg-9">
+                                    <input type="text" id="total_pay" name="total_pay" class="form-control"
+                                        value="">
                                 </div>
-                                <div class="form-group row">
-                                    <label for="keterangan" class="col-lg-3 col-form-label text-lg-end">Keterangan</label>
-                                    <div class="col-lg-9">
-                                        <input type="text" id="keterangan" name="keterangan" class="form-control"
-                                            value="">
-                                    </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="keterangan" class="col-lg-3 col-form-label text-lg-end">Keterangan</label>
+                                <div class="col-lg-9">
+                                    <input type="text" id="keterangan" name="keterangan" class="form-control"
+                                        value="">
                                 </div>
-                            @endforeach
+                            </div>
+
 
                         </div>
                         <div class="modal-footer">
@@ -427,7 +443,14 @@
                 });
             });
 
-            $('#bayar').on('click', function() {
+            $(document).on('click', '.bayar-btn', function() {
+                let url = $(this).data('url');
+                let id = $(this).data('id');
+                let name = $(this).data('name');
+
+                $('#bebasForm').attr('action', url);
+                $('#bebas_id').val(id);
+                $('#name').val(name);
                 $('#bebasFormModal').modal('show');
             });
 
@@ -446,7 +469,7 @@
                 }
             });
 
-            $('#detail').on('click', function() {
+            $(document).on('click', '.detail-btn', function() {
                 var url = $(this).data('url');
                 $('#detailBebasFormModal').modal('show');
 

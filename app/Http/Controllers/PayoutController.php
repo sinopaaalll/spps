@@ -7,6 +7,7 @@ use App\Models\BebasPay;
 use App\Models\Bulan;
 use App\Models\Bulanan;
 use App\Models\JenisPembayaran;
+use App\Models\LogsTrx;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use Carbon\Carbon;
@@ -19,56 +20,87 @@ class PayoutController extends Controller
 {
     public function index(Request $request)
     {
-        $siswa = null;
-        $bulan = null;
-        $bulanan = null;
-        $bebas = null;
-        $jenis_pembayaran_bulanan = null;
-        $jenis_pembayaran_bebas = null;
-        $ta_selected = null;
         $tahun_ajaran = TahunAjaran::all();
+        $siswa = null;
+        $logs_trx = collect();;
+        $bulan = Bulan::all();
+        $bulanan = collect();
+        $bebas = collect();
+        $ta_selected = null;
 
         if ($request->t && $request->n) {
             $siswa = Siswa::with(['kelas', 'bulanan'])->where('nis', $request->n)->first();
-            $ta_selected = TahunAjaran::findOrFail($request->t);
-            $bulan = Bulan::all();
-            $jenis_pembayaran_bulanan = JenisPembayaran::where('tipe', 'bulanan')
-                ->where('tahun_ajaran_id', $request->t)
-                ->first();
-            $jenis_pembayaran_bebas = JenisPembayaran::where('tipe', 'bebas')
-                ->where('tahun_ajaran_id', $request->t)
-                ->first();
+            $ta_selected = TahunAjaran::find($request->t);
 
-            if (!$jenis_pembayaran_bulanan) {
-                return redirect()->back()->with('error', 'Jenis pembayaran tidak ditemukan.');
+            if (!$siswa || !$ta_selected) {
+                return redirect()->back()->with('error', 'Data siswa atau tahun ajaran tidak ditemukan.');
             }
 
-            // Cek apakah siswa ditemukan
-            if (!$siswa) {
-                return redirect()->back()->with('error', 'Data siswa tidak ditemukan.');
-            }
+            // Ambil Jenis Pembayaran Sekaligus
+            $jenis_pembayaran = JenisPembayaran::where('tahun_ajaran_id', $request->t)->get();
 
-            $bulanan = Bulanan::with([
-                'jenis_pembayaran.pos',
-                'jenis_pembayaran.tahun_ajaran'
-            ])
-                ->where('jenis_pembayaran_id', $jenis_pembayaran_bulanan->id)
+            // Jika jenis pembayaran tidak ditemukan
+
+            // Ambil Data Bulanan & Bebas
+            $bulanan = Bulanan::with(['jenis_pembayaran.pos', 'jenis_pembayaran.tahun_ajaran'])
+                ->whereHas('jenis_pembayaran', function ($query) use ($request) {
+                    $query->where('tahun_ajaran_id', $request->t)
+                        ->where('tipe', 'bulanan');
+                })
                 ->where('siswa_id', $siswa->id)
                 ->get()
                 ->groupBy('jenis_pembayaran_id');
 
-            $bebas = Bebas::with([
-                'jenis_pembayaran.pos',
-                'jenis_pembayaran.tahun_ajaran'
-            ])
-                ->where('jenis_pembayaran_id', $jenis_pembayaran_bebas->id)
-                ->where('siswa_id', $siswa->id)->get();
+            $bebas = Bebas::with(['jenis_pembayaran.pos', 'jenis_pembayaran.tahun_ajaran'])
+                ->whereHas('jenis_pembayaran', function ($query) use ($request) {
+                    $query->where('tahun_ajaran_id', $request->t)
+                        ->where('tipe', 'bebas');
+                })
+                ->where('siswa_id', $siswa->id)
+                ->get();
 
-            // dd($bebas);
+            $logs_trx = LogsTrx::with([
+                'siswa',
+                'bulanan.bulan',
+                'bulanan.jenis_pembayaran.pos',
+                'bulanan.jenis_pembayaran.tahun_ajaran',
+                'bebas_pay.bebas.jenis_pembayaran.pos',
+                'bebas_pay.bebas.jenis_pembayaran.tahun_ajaran',
+            ])
+                ->where('siswa_id', $siswa->id)
+                ->latest('created_at')
+                ->take(3)
+                ->get()
+                ->map(
+                    function ($log) {
+                        if ($log->bulanan_id && !$log->bebas_pay_id) {
+                            $posNama = optional($log->bulanan->jenis_pembayaran->pos)->nama ?? '-';
+                            $tahunAwal = optional($log->bulanan->jenis_pembayaran->tahun_ajaran)->tahun_awal ?? '-';
+                            $tahunAkhir = optional($log->bulanan->jenis_pembayaran->tahun_ajaran)->tahun_akhir ?? '-';
+                            $bulanNama = optional($log->bulanan->bulan)->nama ?? '-';
+
+                            $log->pembayaran = "{$posNama} - T.A {$tahunAwal}/{$tahunAkhir} ({$bulanNama})";
+                            $log->bill = $log->bulanan->bill;
+                            $log->tanggal = $log->bulanan->tanggal;
+                        } elseif ($log->bebas_pay_id && !$log->bulanan_id) {
+                            $posNama = optional($log->bebas_pay->bebas->jenis_pembayaran->pos)->nama ?? '-';
+                            $tahunAwal = optional($log->bebas_pay->bebas->jenis_pembayaran->tahun_ajaran)->tahun_awal ?? '-';
+                            $tahunAkhir = optional($log->bebas_pay->bebas->jenis_pembayaran->tahun_ajaran)->tahun_akhir ?? '-';
+
+                            $log->pembayaran = "{$posNama} - T.A {$tahunAwal}/{$tahunAkhir}";
+                            $log->bill = $log->bebas_pay->pay_bill;
+                            $log->tanggal = $log->bebas_pay->tanggal;
+                        } else {
+                            $log->pembayaran = '-';
+                        }
+                        return $log;
+                    }
+                );;
         }
 
-        return view("pages.payout.index", compact('tahun_ajaran', 'siswa', 'ta_selected', 'bulan', 'bulanan', 'bebas', 'jenis_pembayaran_bebas'));
+        return view("pages.payout.index", compact('tahun_ajaran', 'siswa', 'ta_selected', 'bulan', 'bulanan', 'bebas', 'logs_trx'));
     }
+
 
     public function bulanan_pay($siswa_id, $jenis_pembayaran_id, $bulan_id)
     {
@@ -100,6 +132,12 @@ class PayoutController extends Controller
                 'updated_at' => Carbon::now(),
             ]);
 
+            LogsTrx::create([
+                'siswa_id' => $siswa_id,
+                'bulanan_id' => $bulanan->id,
+                'bebas_pay_id' => null,
+            ]);
+
             DB::commit();
             return redirect()->route('payout.index', [
                 't' => $tahunAjaranId,
@@ -121,6 +159,11 @@ class PayoutController extends Controller
         $siswa = Siswa::findOrFail($siswa_id);
         $tahunAjaranId = JenisPembayaran::where('id', $jenis_pembayaran_id)->value('tahun_ajaran_id');
 
+        $logs_trx = LogsTrx::where([
+            'siswa_id' => $siswa_id,
+            'bulanan_id' => $bulanan->id
+        ])->firstOrFail();
+
         DB::beginTransaction();
         try {
             $bulanan->update([
@@ -129,6 +172,8 @@ class PayoutController extends Controller
                 'tanggal' => null,
                 'updated_at' => Carbon::now(),
             ]);
+
+            $logs_trx->delete();
 
             DB::commit();
             return redirect()->route('payout.index', [
@@ -165,13 +210,19 @@ class PayoutController extends Controller
         DB::beginTransaction();
         try {
 
-            BebasPay::create([
+            $bebasPay = BebasPay::create([
                 'bebas_id' => $request->bebas_id,
                 'number_pay' => $numberPay,
                 'tanggal' => Carbon::now()->format('Y-m-d'),
                 'pay_bill' => $pay_bill,
                 'keterangan' => $request->keterangan,
                 'created_at' => Carbon::now(),
+            ]);
+
+            LogsTrx::create([
+                'siswa_id' => $siswa_id,
+                'bulanan_id' => null,
+                'bebas_pay_id' => $bebasPay->id,
             ]);
 
             $totalPay = BebasPay::where('bebas_id', $request->bebas_id)->sum('pay_bill');
@@ -220,7 +271,13 @@ class PayoutController extends Controller
     public function bebas_destroy(string $id)
     {
         $bebasPay = BebasPay::findOrFail($id);
-        $bebas = Bebas::findOrFail($bebasPay->bebas_id);
+        $bebas = Bebas::with('siswa')->findOrFail($bebasPay->bebas_id);
+
+        $logs_trx = LogsTrx::where([
+            'siswa_id' => $bebas->siswa_id,
+            'bebas_pay_id' => $id
+        ])->firstOrFail();
+
         DB::beginTransaction();
         try {
             $total_pay = $bebas->total_pay - $bebasPay->pay_bill;
@@ -229,6 +286,8 @@ class PayoutController extends Controller
             ]);
 
             $bebasPay->delete();
+            $logs_trx->delete();
+
             DB::commit();
             return response()->json([
                 'status' => 200,
@@ -241,5 +300,31 @@ class PayoutController extends Controller
                 'message' => 'Data gagal dihapus'
             ]);
         }
+    }
+
+    public function print(Request $request)
+    {
+        $siswa = Siswa::with('kelas')->where('nis', $request->n)->firstOrFail();
+        $tahun_ajaran = TahunAjaran::findOrFail($request->t);
+
+        $bulanan = Bulanan::with(['jenis_pembayaran.pos', 'bulan'])->where([
+            'siswa_id' => $siswa->id,
+        ])
+            ->whereHas('jenis_pembayaran', function ($query) use ($request) {
+                $query->where('tahun_ajaran_id', $request->t)
+                    ->where('tipe', 'bulanan');
+            })->get();
+
+        $bebas = Bebas::with(['jenis_pembayaran.pos'])->where([
+            'siswa_id' => $siswa->id,
+        ])
+            ->whereHas('jenis_pembayaran', function ($query) use ($request) {
+                $query->where('tahun_ajaran_id', $request->t)
+                    ->where('tipe', 'bebas');
+            })->get();
+
+        // dd([$siswa, $tahun_ajaran, $bulanan, $bebas]);
+
+        return view('pages.payout.print', compact('siswa', 'tahun_ajaran', 'bulanan', 'bebas'));
     }
 }
