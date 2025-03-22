@@ -4,6 +4,7 @@ use App\Http\Controllers\BulanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisPembayaranController;
 use App\Http\Controllers\KelasController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PayoutController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\SiswaController;
@@ -72,3 +73,6 @@ Route::post('/payout/bebas/pay/{siswa_id}/{jenis_pembayaran_id}', [PayoutControl
 Route::get('/payout/bebas/pay/detail/{bebas_id}/{siswa_id}/{jenis_pembayaran_id}', [PayoutController::class, 'bebas_detail'])->name('payout.bebas.detail');
 Route::delete('/payout/bebas/pay/destroy/{id}', [PayoutController::class, 'bebas_destroy'])->name('payout.bebas.destroy');
 Route::get('/payout/print/', [PayoutController::class, 'print'])->name('payout.print');
+
+Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+Route::post('/laporan/export', [LaporanController::class, 'export'])->name('laporan.export');
