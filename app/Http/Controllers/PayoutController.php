@@ -10,12 +10,13 @@ use App\Models\JenisPembayaran;
 use App\Models\LogsTrx;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Yajra\DataTables\DataTables;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class PayoutController extends Controller
@@ -131,6 +132,7 @@ class PayoutController extends Controller
                 'status' => 1,
                 'number_pay' => $numberPay,
                 'tanggal' => Carbon::now()->format('Y-m-d'),
+                'user_id' => Auth::user()->id,
                 'updated_at' => Carbon::now(),
             ]);
 
@@ -172,6 +174,7 @@ class PayoutController extends Controller
                 'status' => 0,
                 'number_pay' => null,
                 'tanggal' => null,
+                'user_id' => null,
                 'updated_at' => Carbon::now(),
             ]);
 
@@ -218,6 +221,7 @@ class PayoutController extends Controller
                 'tanggal' => Carbon::now()->format('Y-m-d'),
                 'pay_bill' => $pay_bill,
                 'keterangan' => $request->keterangan,
+                'user_id' => Auth::user()->id,
                 'created_at' => Carbon::now(),
             ]);
 

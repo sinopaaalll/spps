@@ -2,12 +2,13 @@
 
 namespace App\Exports;
 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Carbon\Carbon;
 
 class LaporanExport implements FromArray, WithHeadings, WithTitle, WithStyles
 {
@@ -75,9 +76,9 @@ class LaporanExport implements FromArray, WithHeadings, WithTitle, WithStyles
 
         return [
             ['Laporan Keuangan'],
-            ['Nama Sekolah'], // Ganti dengan nama sekolah sesuai kebutuhan
+            ['SD IT AR-RAHMAN'],
             ['Tanggal Laporan : ' . $tglAwal . ' - ' . $tglAkhir],
-            ['Tanggal Unduh : ' . $tglUnduh, '', 'Pengunduh : Administrator'],
+            ['Tanggal Unduh : ' . $tglUnduh, '', 'Pengunduh : ' . Auth::user()->name],
             ['No', 'Pembayaran', 'Nama Siswa', 'Kelas', 'Tanggal', 'Penerimaan'],
         ];
     }

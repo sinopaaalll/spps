@@ -18,29 +18,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::factory(1)->create();
 
         // User::factory()->create([
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
 
-        for ($i = 1; $i < 7; $i++) {
-            Kelas::create([
-                'nama_kelas' => $i,
-            ]);
-        }
+        // for ($i = 1; $i < 7; $i++) {
+        //     Kelas::create([
+        //         'nama_kelas' => $i,
+        //     ]);
+        // }
 
-        TahunAjaran::create([
-            'tahun_awal' => 2024,
-            'tahun_akhir' => 2025,
-            'status' => "Aktif"
-        ]);
+        // TahunAjaran::create([
+        //     'tahun_awal' => 2024,
+        //     'tahun_akhir' => 2025,
+        //     'status' => "Aktif"
+        // ]);
 
-        Siswa::factory(100)->create();
+        // Siswa::factory(100)->create();
 
-        Pos::factory(2)->create();
+        // Pos::factory(2)->create();
 
-        JenisPembayaran::factory(2)->create();
+        // JenisPembayaran::factory(2)->create();
     }
 }

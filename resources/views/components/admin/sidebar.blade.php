@@ -1,61 +1,19 @@
   <nav class="pc-sidebar">
       <div class="navbar-wrapper">
-          <div class="m-header">
-              <a href="#" class="b-brand text-primary">
-                  <!-- ========   Change your logo from here   ============ -->
-                  <img src="{{ asset('assets/images/logo-dark.svg') }}" />
-                  <span class="badge bg-light-success rounded-pill ms-2 theme-version"></span>
+          <div class="m-header d-flex justify-content-center align-items-center">
+              <a href="{{ route('dashboard') }}" class="b-brand text-primary">
+                  <img src="{{ asset('assets/images/logo.png') }}" style="width: 100px;" class="mt-5 mb-2" />
               </a>
           </div>
           <div class="navbar-content">
-              <div class="card pc-user-card">
-                  <div class="card-body">
-                      <div class="d-flex align-items-center">
-                          <div class="flex-shrink-0">
-                              <img src="{{ asset('assets/images/user/avatar-1.jpg') }}" alt="user-image"
-                                  class="user-avtar wid-45 rounded-circle" />
-                          </div>
-                          <div class="flex-grow-1 ms-3 me-2">
-                              <h6 class="mb-0">Jonh Smith</h6>
-                              <small>Administrator</small>
-                          </div>
-                          <a class="btn btn-icon btn-link-secondary avtar-s" data-bs-toggle="collapse"
-                              href="#pc_sidebar_userlink">
-                              <svg class="pc-icon">
-                                  <use xlink:href="#custom-sort-outline"></use>
-                              </svg>
-                          </a>
-                      </div>
-                      <div class="collapse pc-user-links" id="pc_sidebar_userlink">
-                          <div class="pt-3">
-                              <a href="#!">
-                                  <i class="ti ti-user"></i>
-                                  <span>My Account</span>
-                              </a>
-                              <a href="#!">
-                                  <i class="ti ti-settings"></i>
-                                  <span>Settings</span>
-                              </a>
-                              <a href="#!">
-                                  <i class="ti ti-lock"></i>
-                                  <span>Lock Screen</span>
-                              </a>
-                              <a href="#!">
-                                  <i class="ti ti-power"></i>
-                                  <span>Logout</span>
-                              </a>
-                          </div>
-                      </div>
-                  </div>
-              </div>
 
               <ul class="pc-navbar">
                   <li class="pc-item pc-caption">
                       <label>Home</label>
                       <i class="ti ti-dashboard"></i>
                   </li>
-                  <li class="pc-item">
-                      <a href="../widget/w_statistics.html" class="pc-link">
+                  <li class="pc-item {{ Request::is('dashboard') ? 'active' : '' }}">
+                      <a href="{{ route('dashboard') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
                                   <use xlink:href="#custom-status-up"></use>
@@ -74,7 +32,7 @@
                       <a href="{{ route('tahun_ajaran.index') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
-                                  <use xlink:href="#custom-status-up"></use>
+                                  <use xlink:href="#custom-notification-status"></use>
                               </svg>
                           </span>
                           <span class="pc-mtext">Tahun Ajaran</span>
@@ -84,7 +42,7 @@
                       <a href="{{ route('kelas.index') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
-                                  <use xlink:href="#custom-status-up"></use>
+                                  <use xlink:href="#custom-document-filter"></use>
                               </svg>
                           </span>
                           <span class="pc-mtext">Kelas</span>
@@ -94,7 +52,7 @@
                       <a href="{{ route('siswa.index') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
-                                  <use xlink:href="#custom-status-up"></use>
+                                  <use xlink:href="#custom-user-square"></use>
                               </svg>
                           </span>
                           <span class="pc-mtext">Siswa</span>
@@ -102,7 +60,7 @@
                   </li>
 
                   <li class="pc-item pc-caption">
-                      <label>Pembayaran</label>
+                      <label>Transaksi</label>
                       <i class="ti ti-dashboard"></i>
                   </li>
 
@@ -110,7 +68,7 @@
                       <a href="{{ route('payout.index') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
-                                  <use xlink:href="#custom-status-up"></use>
+                                  <use xlink:href="#custom-dollar-square"></use>
                               </svg>
                           </span>
                           <span class="pc-mtext">Pembayaran Siswa</span>
@@ -118,14 +76,14 @@
                   </li>
 
                   <li class="pc-item pc-caption">
-                      <label>Keuangan</label>
+                      <label>Pembayaran</label>
                       <i class="ti ti-dashboard"></i>
                   </li>
                   <li class="pc-item {{ Request::is('pos*') ? 'active' : '' }}">
                       <a href="{{ route('pos.index') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
-                                  <use xlink:href="#custom-status-up"></use>
+                                  <use xlink:href="#custom-notification-status"></use>
                               </svg>
                           </span>
                           <span class="pc-mtext">Pos Pembayaran</span>
@@ -135,25 +93,10 @@
                       <a href="{{ route('jenis_pembayaran.index') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
-                                  <use xlink:href="#custom-status-up"></use>
+                                  <use xlink:href="#custom-notification-status"></use>
                               </svg>
                           </span>
                           <span class="pc-mtext">Jenis Pembayaran</span>
-                      </a>
-                  </li>
-
-                  <li class="pc-item pc-caption">
-                      <label>Setting</label>
-                      <i class="ti ti-dashboard"></i>
-                  </li>
-                  <li class="pc-item {{ Request::is('bulan*') ? 'active' : '' }}">
-                      <a href="{{ route('bulan.index') }}" class="pc-link">
-                          <span class="pc-micon">
-                              <svg class="pc-icon">
-                                  <use xlink:href="#custom-status-up"></use>
-                              </svg>
-                          </span>
-                          <span class="pc-mtext">Bulan</span>
                       </a>
                   </li>
 
@@ -165,12 +108,29 @@
                       <a href="{{ route('laporan.index') }}" class="pc-link">
                           <span class="pc-micon">
                               <svg class="pc-icon">
-                                  <use xlink:href="#custom-status-up"></use>
+                                  <use xlink:href="#custom-calendar-1"></use>
                               </svg>
                           </span>
                           <span class="pc-mtext">Laporan Keuangan</span>
                       </a>
                   </li>
+
+                  <li class="pc-item pc-caption">
+                      <label>Setting</label>
+                      <i class="ti ti-dashboard"></i>
+                  </li>
+                  <li class="pc-item {{ Request::is('bulan*') ? 'active' : '' }}">
+                      <a href="{{ route('bulan.index') }}" class="pc-link">
+                          <span class="pc-micon">
+                              <svg class="pc-icon">
+                                  <use xlink:href="#custom-setting-2"></use>
+                              </svg>
+                          </span>
+                          <span class="pc-mtext">Bulan</span>
+                      </a>
+                  </li>
+
+
 
               </ul>
           </div>

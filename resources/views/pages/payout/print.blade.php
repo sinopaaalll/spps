@@ -152,7 +152,7 @@
     <br><br><br><br>
     <table width="100%" style="font-size: 10pt;">
         <tr>
-            <td><strong><u><span class="upper">( Administrator )</span></u></strong></td>
+            <td><strong><u><span class="upper">( {{ auth()->user()->name }} )</span></u></strong></td>
         </tr>
     </table>
 
