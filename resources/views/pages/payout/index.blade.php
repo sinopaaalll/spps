@@ -333,7 +333,7 @@
                         @csrf
                         <div class="modal-body">
 
-                            <input type="text" id="bebas_id" name="bebas_id" value="">
+                            <input type="hidden" id="bebas_id" name="bebas_id" value="">
                             <div class="form-group row">
                                 <label for="name" class="col-lg-3 col-form-label text-lg-end">Nama
                                     Pembayaran</label>
