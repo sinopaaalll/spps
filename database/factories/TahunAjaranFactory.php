@@ -17,7 +17,9 @@ class TahunAjaranFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'tahun_awal' => 2024,
+            'tahun_akhir' => 2025,
+            'status' => 'Aktif',
         ];
     }
 }
